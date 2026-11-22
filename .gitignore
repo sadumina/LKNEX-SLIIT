@@ -1,0 +1,61 @@
+# Local environment configuration
+.env
+.env.*
+!.env.example
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+.pytype/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python packaging outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test and coverage outputs
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Operating-system noise
+.DS_Store
+.AppleDouble
+Thumbs.db
+Desktop.ini
+
+# Node dependencies and generated frontend outputs
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.nuxt/
+.svelte-kit/
+out/
+coverage/
+
+
+# Logs and temporary files
+*.log
+tmp/
+.temp/
+
+/.local/
