@@ -1,0 +1,1 @@
+# Purpose of this file is to extract atomic factual claims from AI responses
