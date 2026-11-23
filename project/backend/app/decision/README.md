@@ -3,5 +3,5 @@
 These are deterministic components, not LLM agents. Final decisions are enforced by rules so they cannot be bypassed by a model.
 
 ### Files included:
-1. **Policy Engine**: Combines claim verdicts, security results and topic risk, then selects approve, correct, block or human review.
-2. **Correction**: Rewrites the answer using verified claims only and attaches source citations.
+1. **`policy_engine.py`**: Combines claim verdicts, security results and topic risk, then selects approve, correct, block or human review.
+2. **`correction.py`**: Rewrites the answer using verified claims only and attaches source citations.
