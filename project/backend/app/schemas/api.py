@@ -1,0 +1,1 @@
+# Purpose of this file is to define the request and response models used by the API routes
