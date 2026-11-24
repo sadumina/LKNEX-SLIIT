@@ -1,11 +1,23 @@
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.database import db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    conn = db.connect()
+    db.init_db(conn)
+    conn.close()
+    yield
 
 app = FastAPI(
     title="AEGIS AI API",
     description="Multi-Agent AI Verification and Security Framework",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Allow the Next.js frontend to communicate with FastAPI
