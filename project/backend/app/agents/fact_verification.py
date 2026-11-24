@@ -11,8 +11,15 @@ from app.schemas.verification import (
     VerificationResult,
     Verdict,
 )
-from app.core.llm_client import LLMClient
-from app.knowledge_base.vector_store import VectorStore
+try:
+    from app.core.llm_client import LLMClient
+except ImportError:
+    LLMClient = None  # type: ignore
+
+try:
+    from app.knowledge_base.vector_store import VectorStore
+except ImportError:
+    VectorStore = None  # type: ignore
 
 
 class FactVerificationAgent:
@@ -22,9 +29,20 @@ class FactVerificationAgent:
     CONTRADICTED, or INSUFFICIENT_EVIDENCE.
     """
 
-    def __init__(self, llm_client: Optional[LLMClient] = None, vector_store: Optional[VectorStore] = None):
-        self.llm = llm_client or LLMClient()
-        self.vector_store = vector_store or VectorStore()
+    def __init__(self, llm_client=None, vector_store=None):
+        if llm_client is not None:
+            self.llm = llm_client
+        elif LLMClient is not None:
+            self.llm = LLMClient()
+        else:
+            self.llm = None
+
+        if vector_store is not None:
+            self.vector_store = vector_store
+        elif VectorStore is not None:
+            self.vector_store = VectorStore()
+        else:
+            self.vector_store = None
 
     # ------------------------------------------------------------------
     # Public entry point
