@@ -59,3 +59,8 @@ tmp/
 .temp/
 
 /.local/
+
+data/aegis.db*
+data/synthetic
+data/processed/
+data/sample_documents
