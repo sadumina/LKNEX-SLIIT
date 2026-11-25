@@ -83,6 +83,9 @@ class SecurityReport(BaseModel):
     overall_risk: RiskLevel
     scanned_sources: int = Field(..., ge=0)
     recommended_action: str = Field(..., description="approve, human_review, or block")
+    redacted_draft_answer: str = Field(
+        ..., description="Draft answer with supported sensitive values masked"
+    )
 
 
 class ClaimVerdict(BaseModel):
