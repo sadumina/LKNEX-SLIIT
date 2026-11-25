@@ -18,6 +18,21 @@ class Claim(BaseModel):
     entities: Optional[List[str]] = Field(default=None, description="Named entities mentioned in the claim")
     dates: Optional[List[str]] = Field(default=None, description="Date references in the claim")
     numbers: Optional[List[str]] = Field(default=None, description="Numeric values in the claim")
+    negated: bool = Field(default=False, description="Whether the claim contains factual negation")
+
+
+class ExtractedClaim(BaseModel):
+    """Minimal structured claim returned by the claim-extraction LLM."""
+
+    text: str = Field(..., min_length=1, description="Atomic factual statement")
+    entities: List[str] = Field(default_factory=list, description="Named entities in the statement")
+    negated: bool = Field(default=False, description="Whether the statement is negated")
+
+
+class ExtractionResult(BaseModel):
+    """Validated LLM output before deterministic claim finalisation."""
+
+    claims: List[ExtractedClaim] = Field(default_factory=list)
 
 
 class EvidenceChunk(BaseModel):
