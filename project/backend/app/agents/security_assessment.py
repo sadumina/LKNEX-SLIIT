@@ -6,7 +6,7 @@
 from dataclasses import dataclass
 from typing import Iterable
 
-from app.core.security import SECURITY_RULES, mask_sensitive_data
+from app.core.security import SECURITY_RULES, decoded_base64_segments, mask_sensitive_data
 from app.schemas.verification import (
     EvidenceChunk,
     RiskLevel,
@@ -21,6 +21,7 @@ class _ScanTarget:
     text: str
     source: SecuritySource
     source_id: str
+    encoded: bool = False
 
 
 _RISK_ORDER = {
@@ -53,13 +54,25 @@ class SecurityAssessmentAgent:
             )
             for chunk in evidence_chunks
         )
+        scanned_sources = len(targets)
+        encoded_targets = [
+            _ScanTarget(
+                text=decoded,
+                source=target.source,
+                source_id=target.source_id,
+                encoded=True,
+            )
+            for target in targets
+            for decoded in decoded_base64_segments(target.text)
+        ]
+        targets.extend(encoded_targets)
 
         findings: list[SecurityFinding] = []
-        seen: set[tuple[str, SecuritySource, str]] = set()
+        seen: set[tuple[str, SecuritySource, str, bool]] = set()
 
         for target in targets:
             for rule in SECURITY_RULES:
-                key = (rule.rule_id, target.source, target.source_id)
+                key = (rule.rule_id, target.source, target.source_id, target.encoded)
                 if key in seen or not rule.matches(target.text):
                     continue
                 seen.add(key)
@@ -71,6 +84,7 @@ class SecurityAssessmentAgent:
                         source_id=target.source_id,
                         rule_id=rule.rule_id,
                         description=rule.description,
+                        detected_in_encoded_content=target.encoded,
                     )
                 )
 
@@ -88,7 +102,7 @@ class SecurityAssessmentAgent:
         return SecurityReport(
             findings=findings,
             overall_risk=overall_risk,
-            scanned_sources=len(targets),
+            scanned_sources=scanned_sources,
             recommended_action=action,
             redacted_draft_answer=mask_sensitive_data(draft_answer or ""),
         )

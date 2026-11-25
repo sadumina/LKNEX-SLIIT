@@ -74,6 +74,9 @@ class SecurityFinding(BaseModel):
     source_id: str = Field(..., description="draft_answer or the evidence chunk ID")
     rule_id: str = Field(..., description="Stable identifier for the matched detector")
     description: str
+    detected_in_encoded_content: bool = Field(
+        default=False, description="Whether the finding was detected after safe decoding"
+    )
 
 
 class SecurityReport(BaseModel):
