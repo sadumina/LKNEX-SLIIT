@@ -53,6 +53,12 @@ def evaluate_security_cases(
     safe_cases = 0
     false_positives = 0
     failed_cases: list[dict[str, Any]] = []
+    case_results: list[dict[str, Any]] = []
+    risk_labels = [level.value for level in RiskLevel]
+    confusion_matrix = {
+        expected: {actual: 0 for actual in risk_labels}
+        for expected in risk_labels
+    }
 
     for case in cases:
         expected_risk = RiskLevel(case["expected_risk"])
@@ -64,6 +70,18 @@ def evaluate_security_cases(
         expected_rule_ids = set(case["expected_rule_ids"])
         risk_correct = report.overall_risk == expected_risk
         rules_correct = expected_rule_ids.issubset(actual_rule_ids)
+        passed = risk_correct and rules_correct
+        confusion_matrix[expected_risk.value][report.overall_risk.value] += 1
+        case_results.append(
+            {
+                "case_id": case["case_id"],
+                "expected_risk": expected_risk.value,
+                "actual_risk": report.overall_risk.value,
+                "expected_rule_ids": sorted(expected_rule_ids),
+                "actual_rule_ids": sorted(actual_rule_ids),
+                "passed": passed,
+            }
+        )
 
         if risk_correct:
             correct_risk += 1
@@ -95,5 +113,49 @@ def evaluate_security_cases(
         "classification_accuracy": correct_risk / total if total else 0.0,
         "detection_rate": detected_attacks / attack_cases if attack_cases else 0.0,
         "false_positive_rate": false_positives / safe_cases if safe_cases else 0.0,
+        "confusion_matrix": confusion_matrix,
+        "case_results": case_results,
         "failed_cases": failed_cases,
     }
+
+
+def format_security_evaluation(metrics: dict[str, Any]) -> str:
+    """Format summary, per-case results, and confusion matrix for a terminal."""
+    lines = [
+        "SECURITY ASSESSMENT EVALUATION",
+        "=" * 80,
+        f"Total cases:            {metrics['total_cases']}",
+        f"Classification accuracy: {metrics['classification_accuracy']:.2%}",
+        f"Attack detection rate:   {metrics['detection_rate']:.2%}",
+        f"False-positive rate:     {metrics['false_positive_rate']:.2%}",
+        "",
+        "CASE EVALUATION MATRIX",
+        "-" * 80,
+        f"{'Case ID':<18} {'Expected':<10} {'Actual':<10} {'Result':<8} Detected rules",
+        "-" * 80,
+    ]
+    for result in metrics["case_results"]:
+        detected_rules = ", ".join(result["actual_rule_ids"]) or "-"
+        status = "PASS" if result["passed"] else "FAIL"
+        lines.append(
+            f"{result['case_id']:<18} {result['expected_risk']:<10} "
+            f"{result['actual_risk']:<10} {status:<8} {detected_rules}"
+        )
+
+    labels = [level.value for level in RiskLevel]
+    lines.extend(
+        [
+            "",
+            "RISK CONFUSION MATRIX (rows=expected, columns=actual)",
+            "-" * 55,
+            f"{'Expected \\ Actual':<20}" + "".join(f"{label:<10}" for label in labels),
+            "-" * 55,
+        ]
+    )
+    for expected in labels:
+        counts = metrics["confusion_matrix"][expected]
+        lines.append(
+            f"{expected:<20}" + "".join(f"{counts[actual]:<10}" for actual in labels)
+        )
+
+    return "\n".join(lines)
