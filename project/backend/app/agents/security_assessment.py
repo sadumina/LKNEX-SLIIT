@@ -6,7 +6,7 @@
 from dataclasses import dataclass
 from typing import Iterable
 
-from app.core.security import SECURITY_RULES
+from app.core.security import SECURITY_RULES, mask_sensitive_data
 from app.schemas.verification import (
     EvidenceChunk,
     RiskLevel,
@@ -60,7 +60,7 @@ class SecurityAssessmentAgent:
         for target in targets:
             for rule in SECURITY_RULES:
                 key = (rule.rule_id, target.source, target.source_id)
-                if key in seen or not rule.pattern.search(target.text):
+                if key in seen or not rule.matches(target.text):
                     continue
                 seen.add(key)
                 findings.append(
@@ -90,6 +90,7 @@ class SecurityAssessmentAgent:
             overall_risk=overall_risk,
             scanned_sources=len(targets),
             recommended_action=action,
+            redacted_draft_answer=mask_sensitive_data(draft_answer or ""),
         )
 
 

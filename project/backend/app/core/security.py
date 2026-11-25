@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass
 import re
-from typing import Pattern
+from typing import Callable, Match, Pattern
 
 from app.schemas.verification import RiskLevel, SecurityFindingType
 
@@ -16,6 +16,14 @@ class SecurityRule:
     severity: RiskLevel
     pattern: Pattern[str]
     description: str
+    validator: Callable[[Match[str]], bool] | None = None
+
+    def matches(self, text: str) -> bool:
+        """Return true when a pattern has at least one validated match."""
+        return any(
+            self.validator is None or self.validator(match)
+            for match in self.pattern.finditer(text)
+        )
 
 
 def _rule(
@@ -24,6 +32,7 @@ def _rule(
     severity: RiskLevel,
     pattern: str,
     description: str,
+    validator: Callable[[Match[str]], bool] | None = None,
 ) -> SecurityRule:
     return SecurityRule(
         rule_id=rule_id,
@@ -31,7 +40,51 @@ def _rule(
         severity=severity,
         pattern=re.compile(pattern, re.IGNORECASE),
         description=description,
+        validator=validator,
     )
+
+
+_CARD_PATTERN = re.compile(r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)")
+_CREDENTIAL_PATTERN = re.compile(
+    r"\b(?P<label>api[_ -]?key|access[_ -]?token|secret|password)"
+    r"(?P<separator>\s*[:=]\s*)(?P<value>[^\s,;]{6,})",
+    re.IGNORECASE,
+)
+_PRIVATE_KEY_BLOCK_PATTERN = re.compile(
+    r"-----BEGIN (?P<kind>(?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY)-----"
+    r".*?-----END (?P=kind)-----",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _passes_luhn(match: Match[str]) -> bool:
+    digits = [int(char) for char in match.group(0) if char.isdigit()]
+    if not 13 <= len(digits) <= 19:
+        return False
+
+    checksum = 0
+    parity = len(digits) % 2
+    for index, digit in enumerate(digits):
+        if index % 2 == parity:
+            digit *= 2
+            if digit > 9:
+                digit -= 9
+        checksum += digit
+    return checksum % 10 == 0
+
+
+def mask_sensitive_data(text: str) -> str:
+    """Redact supported secret types without changing non-sensitive text."""
+    masked = _PRIVATE_KEY_BLOCK_PATTERN.sub("[REDACTED_PRIVATE_KEY]", text)
+    masked = _CREDENTIAL_PATTERN.sub(
+        lambda match: f"{match.group('label')}{match.group('separator')}[REDACTED]",
+        masked,
+    )
+    masked = _CARD_PATTERN.sub(
+        lambda match: "[REDACTED_PAYMENT_CARD]" if _passes_luhn(match) else match.group(0),
+        masked,
+    )
+    return masked
 
 
 SECURITY_RULES: tuple[SecurityRule, ...] = (
@@ -76,5 +129,6 @@ SECURITY_RULES: tuple[SecurityRule, ...] = (
         RiskLevel.HIGH,
         r"(?<!\d)(?:\d[ -]*?){13,19}(?!\d)",
         "Content appears to contain a payment-card number.",
+        validator=_passes_luhn,
     ),
 )
