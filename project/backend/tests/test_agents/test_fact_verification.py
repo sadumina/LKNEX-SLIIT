@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.agents.fact_verification import FactVerificationAgent
+from app.agents.fact_verification import FactVerificationAgent, run
 from app.schemas.verification import Claim, EvidenceChunk, Verdict
 
 
@@ -167,3 +167,104 @@ def test_empty_claims_returns_empty_result():
     assert result.total_claims == 0
     assert result.supported_count == 0
     assert result.overall_status == "no_claims"
+
+
+def test_unrelated_numeric_evidence_does_not_create_false_contradiction():
+    agent = FactVerificationAgent(llm_client=FakeLLM([]), vector_store=FakeVectorStore())
+
+    claims = [_make_claim("C1", "Employees receive a transport allowance of 5000.", numbers=["5000"])]
+    evidence = [
+        _make_evidence(
+            "E1",
+            "Contractors must submit invoices within 21 calendar days.",
+            "HR_POL_001",
+            "HR_POL_001-S02",
+        )
+    ]
+
+    result = agent.verify(claims, evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.INSUFFICIENT_EVIDENCE
+    assert result.claim_verdicts[0].source_references == []
+
+
+def test_superseded_evidence_is_not_used():
+    agent = FactVerificationAgent(llm_client=FakeLLM([]), vector_store=FakeVectorStore())
+    claims = [_make_claim("C1", "Staff receive 21 annual leave days.", numbers=["21"])]
+    evidence = [
+        _make_evidence(
+            "E1",
+            "Staff receive 21 annual leave days.",
+            "HR_POL_OLD",
+            "HR_POL_OLD-S01",
+            status="SUPERSEDED",
+        )
+    ]
+
+    result = agent.verify(claims, evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.INSUFFICIENT_EVIDENCE
+    assert result.claim_verdicts[0].source_references == []
+
+
+def test_markdown_fenced_json_response_is_accepted():
+    llm = FakeLLM([
+        '```json\n{"verdict": "SUPPORTED", "explanation": "The evidence matches."}\n```'
+    ])
+    agent = FactVerificationAgent(llm_client=llm, vector_store=FakeVectorStore())
+    claims = [_make_claim("C1", "Staff receive annual leave.")]
+    evidence = [_make_evidence("E1", "Staff receive annual leave.", "HR_POL_001", "HR_POL_001-S01")]
+
+    result = agent.verify(claims, evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.SUPPORTED
+
+
+def test_malformed_llm_response_fails_closed():
+    agent = FactVerificationAgent(llm_client=FakeLLM(["not-json"]), vector_store=FakeVectorStore())
+    claims = [_make_claim("C1", "Staff receive annual leave.")]
+    evidence = [_make_evidence("E1", "Staff receive annual leave.", "HR_POL_001", "HR_POL_001-S01")]
+
+    result = agent.verify(claims, evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.INSUFFICIENT_EVIDENCE
+    assert "failed" in result.claim_verdicts[0].explanation.lower()
+
+
+def test_workflow_node_returns_verdicts_and_aggregate_result():
+    llm = FakeLLM([
+        '{"verdict": "SUPPORTED", "explanation": "The evidence matches."}'
+    ])
+    agent = FactVerificationAgent(llm_client=llm, vector_store=FakeVectorStore())
+    state = {
+        "claims": [_make_claim("C1", "Staff receive annual leave.")],
+        "evidence_chunks": [
+            _make_evidence("E1", "Staff receive annual leave.", "HR_POL_001", "HR_POL_001-S01")
+        ],
+    }
+
+    update = run(state, agent=agent)
+
+    assert update["claim_verdicts"][0].verdict == Verdict.SUPPORTED
+    assert update["verification_result"].overall_status == "all_supported"
+
+
+def test_number_with_unit_matches_plain_number_in_evidence():
+    llm = FakeLLM([
+        '{"verdict": "SUPPORTED", "explanation": "Both specify 21 days."}'
+    ])
+    agent = FactVerificationAgent(llm_client=llm, vector_store=FakeVectorStore())
+    claims = [_make_claim("C1", "Staff receive 21 days of leave.", numbers=["21 days"])]
+    evidence = [
+        _make_evidence(
+            "E1",
+            "Staff receive 21 paid annual leave days.",
+            "HR_POL_001",
+            "HR_POL_001-S01",
+        )
+    ]
+
+    result = agent.verify(claims, evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.SUPPORTED
+    assert len(llm.calls) == 1
