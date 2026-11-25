@@ -11,6 +11,22 @@ class Verdict(str, Enum):
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
 
 
+class RiskLevel(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class SecurityFindingType(str, Enum):
+    PROMPT_INJECTION = "prompt_injection"
+    SENSITIVE_INFORMATION = "sensitive_information"
+
+
+class SecuritySource(str, Enum):
+    DRAFT_ANSWER = "draft_answer"
+    EVIDENCE = "evidence"
+
+
 class Claim(BaseModel):
     """An atomic factual claim extracted from an AI-generated response."""
     claim_id: str = Field(..., description="Unique identifier for the claim")
@@ -47,6 +63,26 @@ class EvidenceChunk(BaseModel):
     effective_date: str = Field(..., description="Effective date of the document")
     policy_topic: str = Field(..., description="Policy topic category")
     relevance_score: Optional[float] = Field(default=None, description="Semantic similarity score")
+
+
+class SecurityFinding(BaseModel):
+    """A security concern detected without exposing the matched sensitive value."""
+
+    finding_type: SecurityFindingType
+    severity: RiskLevel
+    source: SecuritySource
+    source_id: str = Field(..., description="draft_answer or the evidence chunk ID")
+    rule_id: str = Field(..., description="Stable identifier for the matched detector")
+    description: str
+
+
+class SecurityReport(BaseModel):
+    """Aggregated output from the Security and Risk Assessment Agent."""
+
+    findings: List[SecurityFinding] = Field(default_factory=list)
+    overall_risk: RiskLevel
+    scanned_sources: int = Field(..., ge=0)
+    recommended_action: str = Field(..., description="approve, human_review, or block")
 
 
 class ClaimVerdict(BaseModel):
