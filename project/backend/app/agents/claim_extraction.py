@@ -7,7 +7,10 @@ import re
 
 from pydantic import ValidationError
 
-from app.core.llm_client import call_structured
+try:
+    from app.core.llm_client import call_structured
+except ImportError:
+    call_structured = None
 from app.schemas.verification import Claim, ExtractedClaim, ExtractionResult
 
 logger = logging.getLogger(__name__)
@@ -107,8 +110,8 @@ def _finalise(extracted: list[ExtractedClaim]) -> list[Claim]:
         seen.add(key)
         claims.append(
             Claim(
-                id=f"C{len(claims) + 1}",
-                text=text,
+                claim_id=f"C{len(claims) + 1}",
+                claim_text=text,
                 entities=_unique(e.strip() for e in item.entities if e.strip()),
                 negated=item.negated or bool(NEGATION_RE.search(text)),
                 numbers=tag_numbers(text),
@@ -140,6 +143,8 @@ def run(state: dict, llm=None) -> dict:
     """
 
     llm = llm or call_structured
+    if llm is None:
+        raise ClaimExtractionError("No structured LLM client is configured.")
     draft = (state.get("draft_answer") or "").strip()
     if not draft:
         return {"claims": []}
@@ -165,7 +170,7 @@ def run(state: dict, llm=None) -> dict:
             continue
 
         claims = _finalise(result.claims)
-        missing = required_numbers - numbers_in(" ".join(c.text for c in claims))
+        missing = required_numbers - numbers_in(" ".join(c.claim_text for c in claims))
 
         if best is None or len(missing) < len(best_missing):
             best, best_missing = claims, missing
