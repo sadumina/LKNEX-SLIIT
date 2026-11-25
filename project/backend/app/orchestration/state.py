@@ -2,7 +2,13 @@
 
 from typing import Any, Dict, List, Optional
 
-from app.schemas.verification import Claim, ClaimVerdict, EvidenceChunk, VerificationResult
+from app.schemas.verification import (
+    Claim,
+    ClaimVerdict,
+    EvidenceChunk,
+    SecurityReport,
+    VerificationResult,
+)
 
 
 class AgentState(Dict[str, Any]):
@@ -38,7 +44,7 @@ class AgentState(Dict[str, Any]):
     evidence_chunks: Optional[List[EvidenceChunk]]
     claim_verdicts: Optional[List[ClaimVerdict]]
     verification_result: Optional[VerificationResult]
-    security_report: Optional[Dict[str, Any]]
+    security_report: Optional[SecurityReport]
     final_action: Optional[str]
     final_answer: Optional[str]
 
