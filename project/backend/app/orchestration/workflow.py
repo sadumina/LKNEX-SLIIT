@@ -13,7 +13,8 @@ from app.decision.policy_engine import PolicyDecisionEngine, run as run_policy_d
 from app.decision.correction import CorrectionAgent, run as run_correction
 from app.orchestration.routing import route_correction_result, route_policy_decision
 from app.orchestration.state import AgentState
-from app.schemas.decision import FinalAction, WorkflowError
+from app.orchestration.supervisor import Supervisor
+from app.schemas.decision import FinalAction
 
 
 def run_post_retrieval_checks(
@@ -60,6 +61,7 @@ def build_post_retrieval_graph(
     security_agent: SecurityAssessmentAgent | None = None,
     policy_engine: PolicyDecisionEngine | None = None,
     correction_agent: CorrectionAgent | None = None,
+    supervisor: Supervisor | None = None,
 ):
     """Compile the first executable LangGraph verification subgraph.
 
@@ -68,41 +70,51 @@ def build_post_retrieval_graph(
     allowed by ``CorrectionStatus`` and are then re-verified.
     """
     graph = StateGraph(AgentState)
+    node_supervisor = supervisor or Supervisor()
 
     def fact_node(state: AgentState) -> dict:
-        update = run_fact_verification(state, agent=fact_agent)
-        update["current_node"] = "fact_verification"
+        update = node_supervisor.execute(
+            "fact_verification",
+            lambda: run_fact_verification(state, agent=fact_agent),
+        )
+        update["current_node"] = (
+            "fact_verification_failed" if update.get("workflow_error") else "fact_verification"
+        )
         return update
 
     def security_node(state: AgentState) -> dict:
-        update = run_security_assessment(state, agent=security_agent)
-        update["current_node"] = "security_assessment"
+        update = node_supervisor.execute(
+            "security_assessment",
+            lambda: run_security_assessment(state, agent=security_agent),
+        )
+        update["current_node"] = (
+            "security_assessment_failed" if update.get("workflow_error") else "security_assessment"
+        )
         return update
 
     def policy_node(state: AgentState) -> dict:
-        update = run_policy_decision(state, engine=policy_engine)
-        update["current_node"] = "policy_decision"
+        update = node_supervisor.execute(
+            "policy_decision",
+            lambda: run_policy_decision(state, engine=policy_engine),
+            max_attempts=1,
+        )
+        update["current_node"] = (
+            "policy_decision_failed" if update.get("workflow_error") else "policy_decision"
+        )
         return update
 
     def correction_node(state: AgentState) -> dict:
-        try:
-            update = run_correction(state, agent=correction_agent)
+        update = node_supervisor.execute(
+            "correction",
+            lambda: run_correction(state, agent=correction_agent),
+        )
+        if update.get("workflow_error") is None:
             update["current_node"] = "correction"
             update["final_answer"] = None
-            return update
-        except Exception as exc:
-            status = state.get("correction_status")
-            attempts = status.attempts + 1 if status is not None else 1
-            return {
-                "current_node": "correction_failed",
-                "final_answer": None,
-                "workflow_error": WorkflowError(
-                    node="correction",
-                    message=str(exc) or type(exc).__name__,
-                    retryable=False,
-                    attempts=attempts,
-                ),
-            }
+        else:
+            update["current_node"] = "correction_failed"
+            update["final_answer"] = None
+        return update
 
     graph.add_node("fact_verification", fact_node)
     graph.add_node("security_assessment", security_node)

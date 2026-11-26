@@ -39,6 +39,19 @@ class _CorrectionAgent:
         return self.result
 
 
+class _FlakyFactAgent:
+    def __init__(self, delegate, failures):
+        self.delegate = delegate
+        self.failures = failures
+        self.calls = 0
+
+    def verify(self, claims, evidence_chunks):
+        self.calls += 1
+        if self.calls <= self.failures:
+            raise TimeoutError("Temporary verification timeout")
+        return self.delegate.verify(claims, evidence_chunks)
+
+
 def _evidence(text: str) -> EvidenceChunk:
     return EvidenceChunk(
         chunk_id="HR_POL_001-S02",
@@ -255,3 +268,43 @@ def test_langgraph_routes_correction_failure_to_human_review():
 def test_invalid_or_missing_policy_action_routes_to_human_review():
     assert route_policy_decision({}) == FinalAction.HUMAN_REVIEW.value
     assert route_policy_decision({"final_action": "invalid"}) == FinalAction.HUMAN_REVIEW.value
+
+
+def test_langgraph_supervisor_recovers_from_transient_fact_failure():
+    delegate = FactVerificationAgent(
+        llm_client=_StructuredVerifier(Verdict.SUPPORTED, "Evidence supports the claim.")
+    )
+    flaky_agent = _FlakyFactAgent(delegate, failures=1)
+    graph = build_post_retrieval_graph(fact_agent=flaky_agent)
+    state = _graph_state(
+        draft="Staff receive annual leave.",
+        claim_text="Staff receive annual leave.",
+        evidence_text="Staff receive annual leave.",
+    )
+
+    result = graph.invoke(state)
+
+    assert result["final_action"] == FinalAction.APPROVE
+    assert result["current_node"] == "approved"
+    assert flaky_agent.calls == 2
+
+
+def test_langgraph_supervisor_escalates_after_fact_retry_exhaustion():
+    delegate = FactVerificationAgent(
+        llm_client=_StructuredVerifier(Verdict.SUPPORTED, "Evidence supports the claim.")
+    )
+    failing_agent = _FlakyFactAgent(delegate, failures=2)
+    graph = build_post_retrieval_graph(fact_agent=failing_agent)
+    state = _graph_state(
+        draft="Staff receive annual leave.",
+        claim_text="Staff receive annual leave.",
+        evidence_text="Staff receive annual leave.",
+    )
+
+    result = graph.invoke(state)
+
+    assert result["final_action"] == FinalAction.HUMAN_REVIEW
+    assert result["current_node"] == "human_review"
+    assert result["workflow_error"].node == "fact_verification"
+    assert result["workflow_error"].attempts == 2
+    assert failing_agent.calls == 2
