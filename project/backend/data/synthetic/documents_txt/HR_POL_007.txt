@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Domestic Business Travel
+Document ID: HR_POL_007
+Version: 1.0
+Status: ACTIVE
+Created: 2025-10-11
+Effective: 2025-10-11
+Owner: People Operations
+Source: synthetic://aster-vale/HR_POL_007/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs domestic business travel for the Aster Vale Services simulation. It applies to employees and people managers. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Domestic hotel reimbursement is capped at LKR 18000 per night.
+
+3. Operating Procedure
+Bookings require department-head approval before purchase. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+An exception requires written finance approval and an itemised invoice. Questions about interpretation are referred to People Operations.
+
+5. Compliance and Records
+The People Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

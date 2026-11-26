@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Hybrid Work Arrangement
+Document ID: HR_POL_004
+Version: 1.0
+Status: ACTIVE
+Created: 2025-06-07
+Effective: 2025-06-07
+Owner: People Operations
+Source: synthetic://aster-vale/HR_POL_004/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs hybrid work arrangement for the Aster Vale Services simulation. It applies to employees and people managers. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Eligible employees may work remotely up to 2 days per week.
+
+3. Operating Procedure
+Eligibility requires 60 days of completed service and manager approval. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+On-site attendance is mandatory for designated customer-facing shifts. Questions about interpretation are referred to People Operations.
+
+5. Compliance and Records
+The People Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Employee Grievance Resolution
+Document ID: HR_POL_008
+Version: 1.0
+Status: ACTIVE
+Created: 2025-11-22
+Effective: 2025-11-22
+Owner: People Operations
+Source: synthetic://aster-vale/HR_POL_008/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs employee grievance resolution for the Aster Vale Services simulation. It applies to employees and people managers. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Human Resources must acknowledge a formal grievance within 3 business days.
+
+3. Operating Procedure
+A case manager should provide an initial response within 10 business days. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Anonymous submissions are reviewed but cannot receive personal case updates. Questions about interpretation are referred to People Operations.
+
+5. Compliance and Records
+The People Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

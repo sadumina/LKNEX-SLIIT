@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Invoice Processing Timelines
+Document ID: FIN_POL_002
+Version: 1.0
+Status: ACTIVE
+Created: 2025-01-08
+Effective: 2025-01-08
+Owner: Finance Operations
+Source: synthetic://aster-vale/FIN_POL_002/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs invoice processing timelines for the Aster Vale Services simulation. It applies to budget owners and finance personnel. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Valid supplier invoices are scheduled for payment within 30 calendar days of acceptance.
+
+3. Operating Procedure
+Invoice matching requires purchase order and goods receipt references. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Disputed invoices remain on hold until resolved. Questions about interpretation are referred to Finance Operations.
+
+5. Compliance and Records
+The Finance Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

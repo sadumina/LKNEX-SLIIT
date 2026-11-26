@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Internal Communication Standards
+Document ID: HB_POL_009
+Version: 1.0
+Status: ACTIVE
+Created: 2025-01-27
+Effective: 2025-01-27
+Owner: Workplace Experience
+Source: synthetic://aster-vale/HB_POL_009/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs internal communication standards for the Aster Vale Services simulation. It applies to employees, contractors and visitors where applicable. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Material operational announcements must be posted to the staff portal.
+
+3. Operating Procedure
+Urgent safety alerts must also use the designated emergency channel. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Personal messaging accounts must not be used to share restricted documents. Questions about interpretation are referred to Workplace Experience.
+
+5. Compliance and Records
+The Workplace Experience team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

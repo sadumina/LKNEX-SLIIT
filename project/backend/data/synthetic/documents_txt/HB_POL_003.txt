@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+New Employee Onboarding
+Document ID: HB_POL_003
+Version: 1.0
+Status: ACTIVE
+Created: 2025-08-03
+Effective: 2025-08-03
+Owner: Workplace Experience
+Source: synthetic://aster-vale/HB_POL_003/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs new employee onboarding for the Aster Vale Services simulation. It applies to employees, contractors and visitors where applicable. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+New employees must complete mandatory orientation within 10 business days.
+
+3. Operating Procedure
+The orientation includes safety, privacy, and acceptable-use modules. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Contractors receive a role-specific induction instead. Questions about interpretation are referred to Workplace Experience.
+
+5. Compliance and Records
+The Workplace Experience team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Probation and Confirmation
+Document ID: HR_POL_002
+Version: 1.0
+Status: ACTIVE
+Created: 2025-03-15
+Effective: 2025-03-15
+Owner: People Operations
+Source: synthetic://aster-vale/HR_POL_002/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs probation and confirmation for the Aster Vale Services simulation. It applies to employees and people managers. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+The standard probation period is 6 months from the employment start date.
+
+3. Operating Procedure
+Applies to newly hired permanent staff. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+A documented extension may not exceed 3 additional months. Questions about interpretation are referred to People Operations.
+
+5. Compliance and Records
+The People Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

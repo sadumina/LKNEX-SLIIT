@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Professional Development Allowance
+Document ID: HR_POL_006
+Version: 1.0
+Status: ACTIVE
+Created: 2025-08-30
+Effective: 2025-08-30
+Owner: People Operations
+Source: synthetic://aster-vale/HR_POL_006/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs professional development allowance for the Aster Vale Services simulation. It applies to employees and people managers. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Eligible staff may claim up to LKR 45000 per fiscal year for approved training.
+
+3. Operating Procedure
+Requests must be submitted at least 10 business days before enrolment. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Travel and accommodation are excluded from the allowance. Questions about interpretation are referred to People Operations.
+
+5. Compliance and Records
+The People Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

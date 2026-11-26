@@ -1,0 +1,51 @@
+document_id,document_title,document_type,document_version,creation_date,effective_date,document_status,source_reference,document_pdf,document_txt,policy_topic
+HR_POL_001,Annual Leave Entitlement,Human Resource Policy,2.0,2026-08-15,2026-09-01,ACTIVE,synthetic://aster-vale/HR_POL_001/v2.0,documents/HR_POL_001.pdf,documents_txt/HR_POL_001.txt,annual_leave
+HR_POL_002,Probation and Confirmation,Human Resource Policy,1.0,2025-03-15,2025-03-15,ACTIVE,synthetic://aster-vale/HR_POL_002/v1.0,documents/HR_POL_002.pdf,documents_txt/HR_POL_002.txt,probation
+HR_POL_003,Sick Leave Reporting,Human Resource Policy,1.0,2025-04-26,2025-04-26,ACTIVE,synthetic://aster-vale/HR_POL_003/v1.0,documents/HR_POL_003.pdf,documents_txt/HR_POL_003.txt,sick_leave
+HR_POL_004,Hybrid Work Arrangement,Human Resource Policy,1.0,2025-06-07,2025-06-07,ACTIVE,synthetic://aster-vale/HR_POL_004/v1.0,documents/HR_POL_004.pdf,documents_txt/HR_POL_004.txt,remote_work
+HR_POL_005,Overtime Authorisation,Human Resource Policy,1.0,2025-07-19,2025-07-19,ACTIVE,synthetic://aster-vale/HR_POL_005/v1.0,documents/HR_POL_005.pdf,documents_txt/HR_POL_005.txt,overtime
+HR_POL_006,Professional Development Allowance,Human Resource Policy,1.0,2025-08-30,2025-08-30,ACTIVE,synthetic://aster-vale/HR_POL_006/v1.0,documents/HR_POL_006.pdf,documents_txt/HR_POL_006.txt,training
+HR_POL_007,Domestic Business Travel,Human Resource Policy,1.0,2025-10-11,2025-10-11,ACTIVE,synthetic://aster-vale/HR_POL_007/v1.0,documents/HR_POL_007.pdf,documents_txt/HR_POL_007.txt,travel
+HR_POL_008,Employee Grievance Resolution,Human Resource Policy,1.0,2025-11-22,2025-11-22,ACTIVE,synthetic://aster-vale/HR_POL_008/v1.0,documents/HR_POL_008.pdf,documents_txt/HR_POL_008.txt,grievance
+HR_POL_009,Annual Leave Entitlement (Superseded Edition),Human Resource Policy,1.0,2024-04-15,2024-05-01,SUPERSEDED,synthetic://aster-vale/HR_POL_009/v1.0,documents/HR_POL_009.pdf,documents_txt/HR_POL_009.txt,annual_leave
+HB_POL_001,Workplace Code of Conduct,Employee Handbook,1.0,2025-05-11,2025-05-11,ACTIVE,synthetic://aster-vale/HB_POL_001/v1.0,documents/HB_POL_001.pdf,documents_txt/HB_POL_001.txt,conduct
+HB_POL_002,Attendance and Time Recording,Employee Handbook,1.0,2025-06-22,2025-06-22,ACTIVE,synthetic://aster-vale/HB_POL_002/v1.0,documents/HB_POL_002.pdf,documents_txt/HB_POL_002.txt,attendance
+HB_POL_003,New Employee Onboarding,Employee Handbook,1.0,2025-08-03,2025-08-03,ACTIVE,synthetic://aster-vale/HB_POL_003/v1.0,documents/HB_POL_003.pdf,documents_txt/HB_POL_003.txt,onboarding
+HB_POL_004,Company Equipment Custody,Employee Handbook,1.0,2025-09-14,2025-09-14,ACTIVE,synthetic://aster-vale/HB_POL_004/v1.0,documents/HB_POL_004.pdf,documents_txt/HB_POL_004.txt,equipment
+HB_POL_005,Employee Expense Submission (Superseded Edition),Employee Handbook,1.0,2024-04-15,2024-05-01,SUPERSEDED,synthetic://aster-vale/HB_POL_005/v1.0,documents/HB_POL_005.pdf,documents_txt/HB_POL_005.txt,expenses
+HB_POL_006,Office Visitor Registration,Employee Handbook,1.0,2025-12-07,2025-12-07,ACTIVE,synthetic://aster-vale/HB_POL_006/v1.0,documents/HB_POL_006.pdf,documents_txt/HB_POL_006.txt,visitor
+HB_POL_007,Employee Recognition Programme,Employee Handbook,1.0,2026-01-18,2026-01-18,ACTIVE,synthetic://aster-vale/HB_POL_007/v1.0,documents/HB_POL_007.pdf,documents_txt/HB_POL_007.txt,recognition
+HB_POL_008,Employee Expense Submission,Employee Handbook,2.0,2026-08-15,2026-09-01,ACTIVE,synthetic://aster-vale/HB_POL_008/v2.0,documents/HB_POL_008.pdf,documents_txt/HB_POL_008.txt,expenses
+HB_POL_009,Internal Communication Standards,Employee Handbook,1.0,2025-01-27,2025-01-27,ACTIVE,synthetic://aster-vale/HB_POL_009/v1.0,documents/HB_POL_009.pdf,documents_txt/HB_POL_009.txt,communication
+IT_POL_001,Password and Authentication Standard,IT Security Policy,2.0,2026-08-15,2026-09-01,ACTIVE,synthetic://aster-vale/IT_POL_001/v2.0,documents/IT_POL_001.pdf,documents_txt/IT_POL_001.txt,password
+IT_POL_002,Endpoint Security Baseline,IT Security Policy,1.0,2025-09-29,2025-09-29,ACTIVE,synthetic://aster-vale/IT_POL_002/v1.0,documents/IT_POL_002.pdf,documents_txt/IT_POL_002.txt,endpoint
+IT_POL_003,Security Incident Reporting,IT Security Policy,1.0,2025-11-10,2025-11-10,ACTIVE,synthetic://aster-vale/IT_POL_003/v1.0,documents/IT_POL_003.pdf,documents_txt/IT_POL_003.txt,incident
+IT_POL_004,Privileged Access Management,IT Security Policy,1.0,2025-12-22,2025-12-22,ACTIVE,synthetic://aster-vale/IT_POL_004/v1.0,documents/IT_POL_004.pdf,documents_txt/IT_POL_004.txt,access
+IT_POL_005,Backup and Restore Operations,IT Security Policy,1.0,2026-02-02,2026-02-02,ACTIVE,synthetic://aster-vale/IT_POL_005/v1.0,documents/IT_POL_005.pdf,documents_txt/IT_POL_005.txt,backup
+IT_POL_006,Password and Authentication Standard (Superseded Edition),IT Security Policy,1.0,2024-04-15,2024-05-01,SUPERSEDED,synthetic://aster-vale/IT_POL_006/v1.0,documents/IT_POL_006.pdf,documents_txt/IT_POL_006.txt,password
+IT_POL_007,Remote Network Access,IT Security Policy,1.0,2025-02-11,2025-02-11,ACTIVE,synthetic://aster-vale/IT_POL_007/v1.0,documents/IT_POL_007.pdf,documents_txt/IT_POL_007.txt,network
+IT_POL_008,Software Change Management,IT Security Policy,1.0,2025-03-25,2025-03-25,ACTIVE,synthetic://aster-vale/IT_POL_008/v1.0,documents/IT_POL_008.pdf,documents_txt/IT_POL_008.txt,software
+DP_POL_001,Information Classification Standard,Data Protection Policy,1.0,2025-11-14,2025-11-14,ACTIVE,synthetic://aster-vale/DP_POL_001/v1.0,documents/DP_POL_001.pdf,documents_txt/DP_POL_001.txt,classification
+DP_POL_002,Records Retention Schedule,Data Protection Policy,2.0,2026-08-15,2026-09-01,ACTIVE,synthetic://aster-vale/DP_POL_002/v2.0,documents/DP_POL_002.pdf,documents_txt/DP_POL_002.txt,retention
+DP_POL_003,Personal Data Request Handling,Data Protection Policy,1.0,2026-02-06,2026-02-06,ACTIVE,synthetic://aster-vale/DP_POL_003/v1.0,documents/DP_POL_003.pdf,documents_txt/DP_POL_003.txt,privacy
+DP_POL_004,Third-Party Data Sharing,Data Protection Policy,1.0,2025-01-04,2025-01-04,ACTIVE,synthetic://aster-vale/DP_POL_004/v1.0,documents/DP_POL_004.pdf,documents_txt/DP_POL_004.txt,sharing
+DP_POL_005,Document Redaction Procedure,Data Protection Policy,1.0,2025-02-15,2025-02-15,ACTIVE,synthetic://aster-vale/DP_POL_005/v1.0,documents/DP_POL_005.pdf,documents_txt/DP_POL_005.txt,redaction
+DP_POL_006,Secure Data Disposal,Data Protection Policy,1.0,2025-03-29,2025-03-29,ACTIVE,synthetic://aster-vale/DP_POL_006/v1.0,documents/DP_POL_006.pdf,documents_txt/DP_POL_006.txt,deletion
+DP_POL_007,Data Access Audit Logging,Data Protection Policy,1.0,2025-05-10,2025-05-10,ACTIVE,synthetic://aster-vale/DP_POL_007/v1.0,documents/DP_POL_007.pdf,documents_txt/DP_POL_007.txt,audit
+DP_POL_008,Records Retention Schedule (Superseded Edition),Data Protection Policy,1.0,2024-04-15,2024-05-01,SUPERSEDED,synthetic://aster-vale/DP_POL_008/v1.0,documents/DP_POL_008.pdf,documents_txt/DP_POL_008.txt,retention
+FIN_POL_001,Procurement Approval Thresholds,Financial Policy,2.0,2026-08-15,2026-09-01,ACTIVE,synthetic://aster-vale/FIN_POL_001/v2.0,documents/FIN_POL_001.pdf,documents_txt/FIN_POL_001.txt,procurement
+FIN_POL_002,Invoice Processing Timelines,Financial Policy,1.0,2025-01-08,2025-01-08,ACTIVE,synthetic://aster-vale/FIN_POL_002/v1.0,documents/FIN_POL_002.pdf,documents_txt/FIN_POL_002.txt,invoice
+FIN_POL_003,Procurement Approval Thresholds (Superseded Edition),Financial Policy,1.0,2024-04-15,2024-05-01,SUPERSEDED,synthetic://aster-vale/FIN_POL_003/v1.0,documents/FIN_POL_003.pdf,documents_txt/FIN_POL_003.txt,procurement
+FIN_POL_004,Department Budget Variance,Financial Policy,1.0,2025-04-02,2025-04-02,ACTIVE,synthetic://aster-vale/FIN_POL_004/v1.0,documents/FIN_POL_004.pdf,documents_txt/FIN_POL_004.txt,budget
+FIN_POL_005,Mileage Reimbursement,Financial Policy,1.0,2025-05-14,2025-05-14,ACTIVE,synthetic://aster-vale/FIN_POL_005/v1.0,documents/FIN_POL_005.pdf,documents_txt/FIN_POL_005.txt,reimburse
+FIN_POL_006,Vendor Due Diligence,Financial Policy,1.0,2025-06-25,2025-06-25,ACTIVE,synthetic://aster-vale/FIN_POL_006/v1.0,documents/FIN_POL_006.pdf,documents_txt/FIN_POL_006.txt,vendor
+FIN_POL_007,Fixed Asset Capitalisation,Financial Policy,1.0,2025-08-06,2025-08-06,ACTIVE,synthetic://aster-vale/FIN_POL_007/v1.0,documents/FIN_POL_007.pdf,documents_txt/FIN_POL_007.txt,assets
+FIN_POL_008,Month-End Financial Close,Financial Policy,1.0,2025-09-17,2025-09-17,ACTIVE,synthetic://aster-vale/FIN_POL_008/v1.0,documents/FIN_POL_008.pdf,documents_txt/FIN_POL_008.txt,closing
+ORG_POL_001,Document Version Control,Organisational Guideline,1.0,2025-02-23,2025-02-23,ACTIVE,synthetic://aster-vale/ORG_POL_001/v1.0,documents/ORG_POL_001.pdf,documents_txt/ORG_POL_001.txt,document_control
+ORG_POL_002,Enterprise Risk Register,Organisational Guideline,1.0,2025-04-06,2025-04-06,ACTIVE,synthetic://aster-vale/ORG_POL_002/v1.0,documents/ORG_POL_002.pdf,documents_txt/ORG_POL_002.txt,risk
+ORG_POL_003,Business Continuity Exercise,Organisational Guideline,1.0,2025-05-18,2025-05-18,ACTIVE,synthetic://aster-vale/ORG_POL_003/v1.0,documents/ORG_POL_003.pdf,documents_txt/ORG_POL_003.txt,continuity
+ORG_POL_004,Quality Review Checklist,Organisational Guideline,1.0,2025-06-29,2025-06-29,ACTIVE,synthetic://aster-vale/ORG_POL_004/v1.0,documents/ORG_POL_004.pdf,documents_txt/ORG_POL_004.txt,quality
+ORG_POL_005,Supplier Performance Reviews,Organisational Guideline,1.0,2025-08-10,2025-08-10,ACTIVE,synthetic://aster-vale/ORG_POL_005/v1.0,documents/ORG_POL_005.pdf,documents_txt/ORG_POL_005.txt,supplier
+ORG_POL_006,Governance Meeting Records,Organisational Guideline,1.0,2025-09-21,2025-09-21,ACTIVE,synthetic://aster-vale/ORG_POL_006/v1.0,documents/ORG_POL_006.pdf,documents_txt/ORG_POL_006.txt,meeting_records
+ORG_POL_007,Protected Reporting Channel,Organisational Guideline,1.0,2025-11-02,2025-11-02,ACTIVE,synthetic://aster-vale/ORG_POL_007/v1.0,documents/ORG_POL_007.pdf,documents_txt/ORG_POL_007.txt,whistleblowing
+ORG_POL_008,Responsible AI Usage Guideline,Organisational Guideline,1.0,2025-12-14,2025-12-14,ACTIVE,synthetic://aster-vale/ORG_POL_008/v1.0,documents/ORG_POL_008.pdf,documents_txt/ORG_POL_008.txt,ai_usage

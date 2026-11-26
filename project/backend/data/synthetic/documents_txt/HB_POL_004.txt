@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Company Equipment Custody
+Document ID: HB_POL_004
+Version: 1.0
+Status: ACTIVE
+Created: 2025-09-14
+Effective: 2025-09-14
+Owner: Workplace Experience
+Source: synthetic://aster-vale/HB_POL_004/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs company equipment custody for the Aster Vale Services simulation. It applies to employees, contractors and visitors where applicable. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Assigned laptops must be returned within 3 business days after separation.
+
+3. Operating Procedure
+Asset transfers require a signed handover record. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Lost devices must be reported to IT within 1 hour of discovery. Questions about interpretation are referred to Workplace Experience.
+
+5. Compliance and Records
+The Workplace Experience team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

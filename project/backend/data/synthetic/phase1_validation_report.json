@@ -1,0 +1,105 @@
+{
+  "phase": 1,
+  "synthetic_only": true,
+  "document_count": 50,
+  "pdf_count": 50,
+  "txt_count": 50,
+  "section_count": 250,
+  "category_distribution": {
+    "Human Resource Policy": 9,
+    "Employee Handbook": 9,
+    "IT Security Policy": 8,
+    "Data Protection Policy": 8,
+    "Financial Policy": 8,
+    "Organisational Guideline": 8
+  },
+  "status_distribution": {
+    "ACTIVE": 45,
+    "SUPERSEDED": 5
+  },
+  "document_id_unique": true,
+  "source_reference_unique": true,
+  "exact_content_duplicates": 0,
+  "maximum_pairwise_text_similarity": {
+    "score": 0.988,
+    "document_ids": [
+      "HB_POL_005",
+      "HB_POL_008"
+    ]
+  },
+  "version_conflict_topics": {
+    "annual_leave": [
+      {
+        "document_id": "HR_POL_001",
+        "version": "2.0",
+        "status": "ACTIVE",
+        "core_rule": "Full-time staff receive 21 paid annual leave days per calendar year."
+      },
+      {
+        "document_id": "HR_POL_009",
+        "version": "1.0",
+        "status": "SUPERSEDED",
+        "core_rule": "Full-time staff receive 18 paid annual leave days per calendar year."
+      }
+    ],
+    "expenses": [
+      {
+        "document_id": "HB_POL_005",
+        "version": "1.0",
+        "status": "SUPERSEDED",
+        "core_rule": "Routine expense claims must be submitted within 10 calendar days of purchase."
+      },
+      {
+        "document_id": "HB_POL_008",
+        "version": "2.0",
+        "status": "ACTIVE",
+        "core_rule": "Routine expense claims must be submitted within 15 calendar days of purchase."
+      }
+    ],
+    "password": [
+      {
+        "document_id": "IT_POL_001",
+        "version": "2.0",
+        "status": "ACTIVE",
+        "core_rule": "User passwords must contain at least 14 characters."
+      },
+      {
+        "document_id": "IT_POL_006",
+        "version": "1.0",
+        "status": "SUPERSEDED",
+        "core_rule": "User passwords must contain at least 12 characters."
+      }
+    ],
+    "retention": [
+      {
+        "document_id": "DP_POL_002",
+        "version": "2.0",
+        "status": "ACTIVE",
+        "core_rule": "Routine support tickets are retained for 18 months after closure."
+      },
+      {
+        "document_id": "DP_POL_008",
+        "version": "1.0",
+        "status": "SUPERSEDED",
+        "core_rule": "Routine support tickets are retained for 12 months after closure."
+      }
+    ],
+    "procurement": [
+      {
+        "document_id": "FIN_POL_001",
+        "version": "2.0",
+        "status": "ACTIVE",
+        "core_rule": "Purchases above LKR 250000 require two independent approvals."
+      },
+      {
+        "document_id": "FIN_POL_003",
+        "version": "1.0",
+        "status": "SUPERSEDED",
+        "core_rule": "Purchases above LKR 200000 require two independent approvals."
+      }
+    ]
+  },
+  "pdf_text_extraction_passed": 50,
+  "section_page_mapping_checked": true,
+  "future_phase_links": "Future claim_id, evidence_id and query_id links will be created in subsequent phases; none are invented in Phase 1."
+}

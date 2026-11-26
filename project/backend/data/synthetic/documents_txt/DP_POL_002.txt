@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Records Retention Schedule
+Document ID: DP_POL_002
+Version: 2.0
+Status: ACTIVE
+Created: 2026-08-15
+Effective: 2026-09-01
+Owner: Privacy Office
+Source: synthetic://aster-vale/DP_POL_002/v2.0
+
+1. Purpose and Applicability
+This fictional policy governs records retention schedule for the Aster Vale Services simulation. It applies to staff handling organisational information. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Routine support tickets are retained for 18 months after closure.
+
+3. Operating Procedure
+Records under legal hold must not be deleted. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Retention exceptions require approval from the records officer. Questions about interpretation are referred to Privacy Office.
+
+5. Compliance and Records
+The Privacy Office team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

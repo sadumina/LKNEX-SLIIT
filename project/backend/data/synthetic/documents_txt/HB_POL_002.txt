@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Attendance and Time Recording
+Document ID: HB_POL_002
+Version: 1.0
+Status: ACTIVE
+Created: 2025-06-22
+Effective: 2025-06-22
+Owner: Workplace Experience
+Source: synthetic://aster-vale/HB_POL_002/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs attendance and time recording for the Aster Vale Services simulation. It applies to employees, contractors and visitors where applicable. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Employees must record start and end times on each scheduled workday.
+
+3. Operating Procedure
+Corrections must be requested within 2 business days. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Approved field assignments may use the mobile attendance form. Questions about interpretation are referred to Workplace Experience.
+
+5. Compliance and Records
+The Workplace Experience team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Endpoint Security Baseline
+Document ID: IT_POL_002
+Version: 1.0
+Status: ACTIVE
+Created: 2025-09-29
+Effective: 2025-09-29
+Owner: Information Security
+Source: synthetic://aster-vale/IT_POL_002/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs endpoint security baseline for the Aster Vale Services simulation. It applies to staff and managed service operators. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Managed endpoints must install critical security patches within 7 calendar days.
+
+3. Operating Procedure
+Full-disk encryption is required for portable company devices. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Unsupported operating systems are blocked from corporate VPN access. Questions about interpretation are referred to Information Security.
+
+5. Compliance and Records
+The Information Security team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.
