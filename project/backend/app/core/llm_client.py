@@ -155,15 +155,26 @@ def _chain(provider: str | None) -> tuple[list[_Resolved], bool]:
         for n in os.getenv("LLM_PROVIDERS", DEFAULT_PROVIDERS).split(",")
         if n.strip()
     ]
-    chain = [r for r in (_resolve(n) for n in names) if r is not None]
+    chain: list[_Resolved] = []
+    configuration_errors: list[str] = []
+    for name in names:
+        try:
+            resolved = _resolve(name)
+        except RuntimeError as exc:
+            configuration_errors.append(f"{name}: {exc}")
+            logger.warning("llm_provider_configuration_skipped provider=%s reason=%s", name, exc)
+            continue
+        if resolved is not None:
+            chain.append(resolved)
     if not chain:
         expected = "; ".join(
             f"{n}: {', '.join(PROVIDERS[n].key_envs[:2])}"
             for n in names
             if n in PROVIDERS
         )
+        details = "; ".join(configuration_errors) or expected
         raise RuntimeError(
-            f"No LLM provider is configured. Set an API key in your .env file ({expected})."
+            f"No usable LLM provider is configured. {details}"
         )
     return chain, False
 
