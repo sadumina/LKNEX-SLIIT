@@ -2,6 +2,12 @@
 
 from typing import Any, Dict, List, Optional
 
+from app.schemas.decision import (
+    CorrectionStatus,
+    FinalAction,
+    PolicyDecision,
+    WorkflowError,
+)
 from app.schemas.verification import (
     Claim,
     ClaimVerdict,
@@ -23,7 +29,8 @@ class AgentState(Dict[str, Any]):
     - claim_verdicts: Fact Verification Agent (output) -> Supervisor (input)
     - verification_result: Fact Verification Agent (output) -> Policy Decision Engine (input)
     - security_report: Security & Risk Assessment Agent (output) -> Supervisor (input)
-    - final_action: Policy Decision Engine (output)
+    - policy_decision: Policy Decision Engine (typed output)
+    - final_action: Policy Decision Engine (compatibility/action shortcut)
     - final_answer: Correction Module (output)
     - run_id: Supervisor (input/output)
     - user_role: Supervisor (input)
@@ -45,12 +52,16 @@ class AgentState(Dict[str, Any]):
     claim_verdicts: Optional[List[ClaimVerdict]]
     verification_result: Optional[VerificationResult]
     security_report: Optional[SecurityReport]
-    final_action: Optional[str]
+    policy_decision: Optional[PolicyDecision]
+    final_action: Optional[FinalAction]
     final_answer: Optional[str]
 
     # Control
     error: Optional[str]
+    workflow_error: Optional[WorkflowError]
     retry_count: int
+    correction_status: CorrectionStatus
+    current_node: Optional[str]
 
 
 def initial_state(
@@ -75,8 +86,12 @@ def initial_state(
         claim_verdicts=None,
         verification_result=None,
         security_report=None,
+        policy_decision=None,
         final_action=None,
         final_answer=None,
         error=None,
+        workflow_error=None,
         retry_count=0,
+        correction_status=CorrectionStatus(),
+        current_node=None,
     )
