@@ -16,3 +16,11 @@ def route_policy_decision(state: dict) -> str:
     except (TypeError, ValueError):
         # Missing or invalid policy output must never release the response.
         return FinalAction.HUMAN_REVIEW.value
+
+
+def route_correction_result(state: dict) -> str:
+    """Re-verify successful corrections or route failures to policy handling."""
+    error = state.get("workflow_error")
+    if error is not None and error.node == "correction":
+        return "failed"
+    return "reverify"
