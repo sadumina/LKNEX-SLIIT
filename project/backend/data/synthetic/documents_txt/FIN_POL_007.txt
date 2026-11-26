@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Fixed Asset Capitalisation
+Document ID: FIN_POL_007
+Version: 1.0
+Status: ACTIVE
+Created: 2025-08-06
+Effective: 2025-08-06
+Owner: Finance Operations
+Source: synthetic://aster-vale/FIN_POL_007/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs fixed asset capitalisation for the Aster Vale Services simulation. It applies to budget owners and finance personnel. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Equipment purchases of LKR 150000 or more are capitalised.
+
+3. Operating Procedure
+Assets must receive a unique register identifier. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Consumable supplies are expensed regardless of total order size. Questions about interpretation are referred to Finance Operations.
+
+5. Compliance and Records
+The Finance Operations team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

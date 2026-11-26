@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Protected Reporting Channel
+Document ID: ORG_POL_007
+Version: 1.0
+Status: ACTIVE
+Created: 2025-11-02
+Effective: 2025-11-02
+Owner: Governance Office
+Source: synthetic://aster-vale/ORG_POL_007/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs protected reporting channel for the Aster Vale Services simulation. It applies to policy owners and business unit leads. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Ethics reports must be acknowledged within 2 business days when contact details are provided.
+
+3. Operating Procedure
+Report identities are limited to authorised investigators. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Retaliation allegations receive priority review. Questions about interpretation are referred to Governance Office.
+
+5. Compliance and Records
+The Governance Office team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

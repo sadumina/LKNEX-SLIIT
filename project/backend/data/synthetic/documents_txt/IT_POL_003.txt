@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Security Incident Reporting
+Document ID: IT_POL_003
+Version: 1.0
+Status: ACTIVE
+Created: 2025-11-10
+Effective: 2025-11-10
+Owner: Information Security
+Source: synthetic://aster-vale/IT_POL_003/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs security incident reporting for the Aster Vale Services simulation. It applies to staff and managed service operators. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Suspected security incidents must be reported to the service desk within 30 minutes of discovery.
+
+3. Operating Procedure
+The security team assigns a severity category after triage. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Employees must not delete relevant logs or evidence. Questions about interpretation are referred to Information Security.
+
+5. Compliance and Records
+The Information Security team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

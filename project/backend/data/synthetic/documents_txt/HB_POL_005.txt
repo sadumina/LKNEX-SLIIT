@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Employee Expense Submission (Superseded Edition)
+Document ID: HB_POL_005
+Version: 1.0
+Status: SUPERSEDED
+Created: 2024-04-15
+Effective: 2024-05-01
+Owner: Workplace Experience
+Source: synthetic://aster-vale/HB_POL_005/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs employee expense submission (superseded edition) for the Aster Vale Services simulation. It applies to employees, contractors and visitors where applicable. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Routine expense claims must be submitted within 10 calendar days of purchase.
+
+3. Operating Procedure
+Each claim must include an itemised receipt. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Claims older than 15 days require finance-manager justification. Questions about interpretation are referred to Workplace Experience.
+
+5. Compliance and Records
+The Workplace Experience team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.

@@ -1,0 +1,24 @@
+SYNTHETIC TRAINING DOCUMENT — NOT A REAL ORGANISATIONAL POLICY
+Software Change Management
+Document ID: IT_POL_008
+Version: 1.0
+Status: ACTIVE
+Created: 2025-03-25
+Effective: 2025-03-25
+Owner: Information Security
+Source: synthetic://aster-vale/IT_POL_008/v1.0
+
+1. Purpose and Applicability
+This fictional policy governs software change management for the Aster Vale Services simulation. It applies to staff and managed service operators. This training document is not a policy of a real organisation.
+
+2. Core Requirement
+Production changes require a recorded change request at least 2 business days in advance.
+
+3. Operating Procedure
+A rollback plan and reviewer approval are mandatory. The responsible owner must keep a dated approval record and communicate material changes through the internal policy portal.
+
+4. Exceptions and Escalation
+Emergency fixes may follow the expedited change procedure. Questions about interpretation are referred to Information Security.
+
+5. Compliance and Records
+The Information Security team maintains compliance evidence, including review decisions and exception logs. Records are reviewed during scheduled internal assurance checks.
