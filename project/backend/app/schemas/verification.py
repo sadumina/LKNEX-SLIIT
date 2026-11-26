@@ -18,6 +18,13 @@ class Verdict(str, Enum):
     INSUFFICIENT_EVIDENCE = "insufficient_evidence"
 
 
+class FactVerificationDecision(BaseModel):
+    """Validated semantic-verification response returned by an LLM provider."""
+
+    verdict: Verdict
+    explanation: str = Field(..., min_length=1)
+
+
 class RiskLevel(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
