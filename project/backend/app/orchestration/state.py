@@ -1,6 +1,6 @@
 # Purpose of this file is to define the shared state passed between all agents and to document which component owns each key
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional, TypedDict
 
 from app.schemas.decision import (
     CorrectionStatus,
@@ -17,7 +17,7 @@ from app.schemas.verification import (
 )
 
 
-class AgentState(Dict[str, Any]):
+class AgentState(TypedDict, total=False):
     """
     Shared workflow state passed between all agents.
 
