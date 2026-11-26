@@ -81,7 +81,7 @@ def _unique(items) -> list[str]:
     seen: dict[str, None] = {}
     for item in items:
         seen.setdefault(item, None)
-        return list(seen)
+    return list(seen)
 
 
 # Coverage check: every number in the draft must appear in some claim.
@@ -91,7 +91,7 @@ _BARE_NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)*")
 
 def numbers_in(text: str) -> set[str]:
     """Bare numbers found in text (commas removed). List markers like "1." are ignored."""
-    text = re.sub(r"(?m)^\s*]d+[.)]\s+", "", text)
+    text = re.sub(r"(?m)^\s*\d+[.)]\s+", "", text)
     return {m.group(0).replace(",", "") for m in _BARE_NUMBER_RE.finditer(text)}
 
 

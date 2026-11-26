@@ -268,3 +268,28 @@ def test_number_with_unit_matches_plain_number_in_evidence():
 
     assert result.claim_verdicts[0].verdict == Verdict.SUPPORTED
     assert len(llm.calls) == 1
+
+
+def test_evidence_accepts_incoming_retrieval_field_names():
+    evidence = EvidenceChunk(
+        chunk_id="E-INCOMING",
+        doc_id="DOC_INCOMING",
+        doc_title="Incoming Policy",
+        version="3.0",
+        page=2,
+        section="DOC_INCOMING-S02",
+        status="current",
+        effective_date="2026-11-26",
+        text="Compatible evidence text.",
+        score=0.91,
+    )
+
+    assert evidence.document_id == "DOC_INCOMING"
+    assert evidence.document_version == "3.0"
+    assert evidence.document_status == "ACTIVE"
+    assert evidence.relevance_score == 0.91
+    assert evidence.doc_id == evidence.document_id
+    assert evidence.version == evidence.document_version
+    assert evidence.section == evidence.section_id
+    assert evidence.status == "current"
+    assert evidence.score == evidence.relevance_score

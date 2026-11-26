@@ -2,7 +2,14 @@
 
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
+
+
+class UserContext(BaseModel):
+    """Authenticated user information passed through the verification pipeline."""
+
+    user_id: str
+    role: str
 
 
 class Verdict(str, Enum):
@@ -28,13 +35,34 @@ class SecuritySource(str, Enum):
 
 
 class Claim(BaseModel):
-    """An atomic factual claim extracted from an AI-generated response."""
-    claim_id: str = Field(..., description="Unique identifier for the claim")
-    claim_text: str = Field(..., description="The factual statement to verify")
-    entities: Optional[List[str]] = Field(default=None, description="Named entities mentioned in the claim")
-    dates: Optional[List[str]] = Field(default=None, description="Date references in the claim")
-    numbers: Optional[List[str]] = Field(default=None, description="Numeric values in the claim")
+    """An atomic claim supporting both pipeline field-name conventions."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    claim_id: str = Field(
+        ...,
+        validation_alias=AliasChoices("claim_id", "id"),
+        description="Unique identifier for the claim",
+    )
+    claim_text: str = Field(
+        ...,
+        validation_alias=AliasChoices("claim_text", "text"),
+        description="The factual statement to verify",
+    )
+    entities: List[str] = Field(default_factory=list, description="Named entities mentioned in the claim")
+    dates: List[str] = Field(default_factory=list, description="Date references in the claim")
+    numbers: List[str] = Field(default_factory=list, description="Numeric values in the claim")
     negated: bool = Field(default=False, description="Whether the claim contains factual negation")
+
+    @property
+    def id(self) -> str:
+        """Incoming member-compatible alias for ``claim_id``."""
+        return self.claim_id
+
+    @property
+    def text(self) -> str:
+        """Incoming member-compatible alias for ``claim_text``."""
+        return self.claim_text
 
 
 class ExtractedClaim(BaseModel):
@@ -52,17 +80,77 @@ class ExtractionResult(BaseModel):
 
 
 class EvidenceChunk(BaseModel):
-    """A passage of evidence retrieved from a trusted organisational document."""
+    """Evidence passage supporting both retrieval and verification names."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
     chunk_id: str = Field(..., description="Unique identifier for the evidence chunk")
     text: str = Field(..., description="The evidence text")
-    document_id: str = Field(..., description="Source document ID (e.g., HR_POL_001)")
-    section_id: str = Field(..., description="Source section ID (e.g., HR_POL_001-S02)")
+    document_id: str = Field(
+        ...,
+        validation_alias=AliasChoices("document_id", "doc_id"),
+        description="Source document ID (e.g., HR_POL_001)",
+    )
+    doc_title: Optional[str] = Field(default=None, description="Human-readable document title")
+    section_id: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("section_id", "section"),
+        description="Source section ID (e.g., HR_POL_001-S02)",
+    )
     page: int = Field(..., description="Page number in the source document")
-    document_version: str = Field(..., description="Document version (e.g., 2.0)")
-    document_status: str = Field(..., description="ACTIVE or SUPERSEDED")
-    effective_date: str = Field(..., description="Effective date of the document")
-    policy_topic: str = Field(..., description="Policy topic category")
-    relevance_score: Optional[float] = Field(default=None, description="Semantic similarity score")
+    document_version: str = Field(
+        ...,
+        validation_alias=AliasChoices("document_version", "version"),
+        description="Document version (e.g., 2.0)",
+    )
+    document_status: str = Field(
+        ...,
+        validation_alias=AliasChoices("document_status", "status"),
+        description="ACTIVE or SUPERSEDED",
+    )
+    effective_date: Optional[str] = Field(default=None, description="Effective date of the document")
+    policy_topic: str = Field(default="unknown", description="Policy topic category")
+    relevance_score: Optional[float] = Field(
+        default=None,
+        validation_alias=AliasChoices("relevance_score", "score"),
+        description="Semantic similarity score",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_document_status(cls, values):
+        """Normalize retrieval status values to the verification convention."""
+        if isinstance(values, dict):
+            values = dict(values)
+            status_key = "document_status" if "document_status" in values else "status"
+            if status_key in values and isinstance(values[status_key], str):
+                status = values[status_key].strip().upper()
+                values[status_key] = {
+                    "CURRENT": "ACTIVE",
+                    "ACTIVE": "ACTIVE",
+                    "SUPERSEDED": "SUPERSEDED",
+                }.get(status, status)
+        return values
+
+    @property
+    def doc_id(self) -> str:
+        return self.document_id
+
+    @property
+    def version(self) -> str:
+        return self.document_version
+
+    @property
+    def section(self) -> Optional[str]:
+        return self.section_id
+
+    @property
+    def status(self) -> str:
+        return "current" if self.document_status == "ACTIVE" else self.document_status.lower()
+
+    @property
+    def score(self) -> Optional[float]:
+        return self.relevance_score
 
 
 class SecurityFinding(BaseModel):

@@ -1,7 +1,7 @@
 # Purpose of this file is to test that the claim extraction agent splits answers into correct atomic claims
 
 from app.agents.claim_extraction import run
-from app.schemas.verification import ExtractionResult, ExtractedClaim
+from app.schemas.verification import Claim, ExtractionResult, ExtractedClaim
 
 
 def test_claim_extraction_uses_shared_claim_schema():
@@ -45,3 +45,16 @@ def test_claim_extraction_output_is_accepted_by_fact_verification_schema():
     assert claim.claim_id == "C1"
     assert claim.dates == ["2024"]
     assert claim.negated is True
+
+
+def test_claim_accepts_incoming_member_field_names():
+    claim = Claim(
+        id="C9",
+        text="Incoming schema remains compatible.",
+        entities=["Incoming schema"],
+    )
+
+    assert claim.claim_id == "C9"
+    assert claim.claim_text == "Incoming schema remains compatible."
+    assert claim.id == claim.claim_id
+    assert claim.text == claim.claim_text
