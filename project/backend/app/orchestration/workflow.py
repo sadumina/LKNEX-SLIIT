@@ -10,9 +10,10 @@ from app.agents.security_assessment import (
     run as run_security_assessment,
 )
 from app.decision.policy_engine import PolicyDecisionEngine, run as run_policy_decision
-from app.orchestration.routing import route_policy_decision
+from app.decision.correction import CorrectionAgent, run as run_correction
+from app.orchestration.routing import route_correction_result, route_policy_decision
 from app.orchestration.state import AgentState
-from app.schemas.decision import FinalAction
+from app.schemas.decision import FinalAction, WorkflowError
 
 
 def run_post_retrieval_checks(
@@ -45,11 +46,6 @@ def _approve_node(state: AgentState) -> dict:
     return {"current_node": "approved", "final_answer": safe_answer}
 
 
-def _correct_node(state: AgentState) -> dict:
-    """Mark correction as pending; the bounded correction loop is added next."""
-    return {"current_node": "correction_pending", "final_answer": None}
-
-
 def _block_node(state: AgentState) -> dict:
     return {"current_node": "blocked", "final_answer": None}
 
@@ -63,12 +59,13 @@ def build_post_retrieval_graph(
     fact_agent: FactVerificationAgent | None = None,
     security_agent: SecurityAssessmentAgent | None = None,
     policy_engine: PolicyDecisionEngine | None = None,
+    correction_agent: CorrectionAgent | None = None,
 ):
     """Compile the first executable LangGraph verification subgraph.
 
     The graph starts after Claim Extraction and Evidence Retrieval have populated
-    shared state. The ``correct`` route intentionally terminates as
-    ``correction_pending`` until the bounded correction module is implemented.
+    shared state. Contradicted claims receive at most the correction attempts
+    allowed by ``CorrectionStatus`` and are then re-verified.
     """
     graph = StateGraph(AgentState)
 
@@ -87,11 +84,31 @@ def build_post_retrieval_graph(
         update["current_node"] = "policy_decision"
         return update
 
+    def correction_node(state: AgentState) -> dict:
+        try:
+            update = run_correction(state, agent=correction_agent)
+            update["current_node"] = "correction"
+            update["final_answer"] = None
+            return update
+        except Exception as exc:
+            status = state.get("correction_status")
+            attempts = status.attempts + 1 if status is not None else 1
+            return {
+                "current_node": "correction_failed",
+                "final_answer": None,
+                "workflow_error": WorkflowError(
+                    node="correction",
+                    message=str(exc) or type(exc).__name__,
+                    retryable=False,
+                    attempts=attempts,
+                ),
+            }
+
     graph.add_node("fact_verification", fact_node)
     graph.add_node("security_assessment", security_node)
     graph.add_node("policy_decision", policy_node)
     graph.add_node(FinalAction.APPROVE.value, _approve_node)
-    graph.add_node(FinalAction.CORRECT.value, _correct_node)
+    graph.add_node(FinalAction.CORRECT.value, correction_node)
     graph.add_node(FinalAction.BLOCK.value, _block_node)
     graph.add_node(FinalAction.HUMAN_REVIEW.value, _human_review_node)
 
@@ -106,7 +123,16 @@ def build_post_retrieval_graph(
             for action in FinalAction
         },
     )
-    for action in FinalAction:
-        graph.add_edge(action.value, END)
+    graph.add_edge(FinalAction.APPROVE.value, END)
+    graph.add_conditional_edges(
+        FinalAction.CORRECT.value,
+        route_correction_result,
+        {
+            "reverify": "fact_verification",
+            "failed": "policy_decision",
+        },
+    )
+    graph.add_edge(FinalAction.BLOCK.value, END)
+    graph.add_edge(FinalAction.HUMAN_REVIEW.value, END)
 
     return graph.compile()

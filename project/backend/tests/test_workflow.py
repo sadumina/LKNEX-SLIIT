@@ -1,6 +1,7 @@
 # Purpose of this file is to test the full verification workflow end to end using the refund policy scenario
 
 from app.agents.fact_verification import FactVerificationAgent
+from app.schemas.decision import CorrectionResult
 from app.orchestration.routing import route_policy_decision
 from app.orchestration.state import initial_state
 from app.orchestration.workflow import build_post_retrieval_graph, run_post_retrieval_checks
@@ -23,6 +24,19 @@ class _StructuredVerifier:
 
     def __call__(self, system, user, schema, **kwargs):
         return self.decision
+
+
+class _CorrectionAgent:
+    def __init__(self, result=None, error=None):
+        self.result = result
+        self.error = error
+        self.calls = 0
+
+    def correct(self, **kwargs):
+        self.calls += 1
+        if self.error is not None:
+            raise self.error
+        return self.result
 
 
 def _evidence(text: str) -> EvidenceChunk:
@@ -154,8 +168,26 @@ def test_langgraph_routes_high_security_risk_to_block():
     assert result["final_answer"] is None
 
 
-def test_langgraph_routes_contradiction_to_correction_pending():
-    graph = build_post_retrieval_graph()
+def test_langgraph_corrects_contradiction_and_reverifies_once():
+    corrector = _CorrectionAgent(
+        result=CorrectionResult(
+            corrected_answer="Staff receive 21 days of leave.",
+            corrected_claims=[
+                Claim(
+                    claim_id="C1-CORRECTED",
+                    claim_text="Staff receive 21 days of leave.",
+                    numbers=["21 days"],
+                )
+            ],
+            source_chunk_ids=["HR_POL_001-S02"],
+        )
+    )
+    graph = build_post_retrieval_graph(
+        fact_agent=FactVerificationAgent(
+            llm_client=_StructuredVerifier(Verdict.SUPPORTED, "Corrected claim is supported.")
+        ),
+        correction_agent=corrector,
+    )
     state = _graph_state(
         draft="Staff receive 18 days of leave.",
         claim_text="Staff receive 18 days of leave.",
@@ -165,8 +197,59 @@ def test_langgraph_routes_contradiction_to_correction_pending():
 
     result = graph.invoke(state)
 
-    assert result["final_action"] == FinalAction.CORRECT
-    assert result["current_node"] == "correction_pending"
+    assert result["final_action"] == FinalAction.APPROVE
+    assert result["current_node"] == "approved"
+    assert result["final_answer"] == "Staff receive 21 days of leave."
+    assert result["correction_status"].attempts == 1
+    assert corrector.calls == 1
+
+
+def test_langgraph_escalates_when_corrected_claim_remains_contradicted():
+    corrector = _CorrectionAgent(
+        result=CorrectionResult(
+            corrected_answer="Staff receive 18 days of leave.",
+            corrected_claims=[
+                Claim(
+                    claim_id="C1-CORRECTED",
+                    claim_text="Staff receive 18 days of leave.",
+                    numbers=["18 days"],
+                )
+            ],
+            source_chunk_ids=["HR_POL_001-S02"],
+        )
+    )
+    graph = build_post_retrieval_graph(correction_agent=corrector)
+    state = _graph_state(
+        draft="Staff receive 18 days of leave.",
+        claim_text="Staff receive 18 days of leave.",
+        evidence_text="Staff receive 21 days of leave.",
+        numbers=["18 days"],
+    )
+
+    result = graph.invoke(state)
+
+    assert result["final_action"] == FinalAction.HUMAN_REVIEW
+    assert result["current_node"] == "human_review"
+    assert result["correction_status"].attempts == 1
+    assert corrector.calls == 1
+
+
+def test_langgraph_routes_correction_failure_to_human_review():
+    graph = build_post_retrieval_graph(
+        correction_agent=_CorrectionAgent(error=RuntimeError("Correction provider unavailable"))
+    )
+    state = _graph_state(
+        draft="Staff receive 18 days of leave.",
+        claim_text="Staff receive 18 days of leave.",
+        evidence_text="Staff receive 21 days of leave.",
+        numbers=["18 days"],
+    )
+
+    result = graph.invoke(state)
+
+    assert result["final_action"] == FinalAction.HUMAN_REVIEW
+    assert result["current_node"] == "human_review"
+    assert result["workflow_error"].node == "correction"
 
 
 def test_invalid_or_missing_policy_action_routes_to_human_review():

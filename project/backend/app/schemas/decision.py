@@ -3,8 +3,11 @@
 """Deterministic decision and workflow-control contracts."""
 
 from enum import Enum
+from typing import List
 
 from pydantic import BaseModel, Field, model_validator
+
+from app.schemas.verification import Claim
 
 
 class FinalAction(str, Enum):
@@ -48,3 +51,11 @@ class CorrectionStatus(BaseModel):
     @property
     def can_retry(self) -> bool:
         return self.attempts < self.max_attempts
+
+
+class CorrectionResult(BaseModel):
+    """Evidence-grounded replacement answer and its atomic claims."""
+
+    corrected_answer: str = Field(..., min_length=1)
+    corrected_claims: List[Claim] = Field(..., min_length=1)
+    source_chunk_ids: List[str] = Field(default_factory=list)
