@@ -3,7 +3,7 @@
 import pytest
 
 from app.agents.fact_verification import FactVerificationAgent, run
-from app.schemas.verification import Claim, EvidenceChunk, Verdict
+from app.schemas.verification import Claim, EvidenceChunk, FactVerificationDecision, Verdict
 
 
 class FakeLLM:
@@ -20,6 +20,16 @@ class FakeLLM:
 
 class FakeVectorStore:
     """Stub vector store - not used directly in these tests since evidence is passed in."""
+
+
+class FakeStructuredLLM:
+    def __init__(self, decision):
+        self.decision = decision
+        self.calls = []
+
+    def __call__(self, system, user, schema, **kwargs):
+        self.calls.append((system, user, schema, kwargs))
+        return self.decision
 
 
 def _make_claim(claim_id, text, entities=None, dates=None, numbers=None):
@@ -89,6 +99,7 @@ def test_contradicted_when_number_mismatch():
 
     assert result.claim_verdicts[0].verdict == Verdict.CONTRADICTED
     assert result.contradicted_count == 1
+    assert llm.calls == []
 
 
 # ------------------------------------------------------------------
@@ -113,7 +124,8 @@ def test_contradicted_when_date_mismatch():
 # INSUFFICIENT_EVIDENCE
 # ------------------------------------------------------------------
 def test_insufficient_when_no_evidence():
-    agent = FactVerificationAgent(llm_client=FakeLLM([]), vector_store=FakeVectorStore())
+    llm = FakeLLM([])
+    agent = FactVerificationAgent(llm_client=llm, vector_store=FakeVectorStore())
 
     claims = [_make_claim("C1", "Some obscure claim with no matching evidence.", numbers=["999"])]
     evidence = []
@@ -122,6 +134,7 @@ def test_insufficient_when_no_evidence():
 
     assert result.claim_verdicts[0].verdict == Verdict.INSUFFICIENT_EVIDENCE
     assert result.insufficient_count == 1
+    assert llm.calls == []
 
 
 # ------------------------------------------------------------------
@@ -293,3 +306,43 @@ def test_evidence_accepts_incoming_retrieval_field_names():
     assert evidence.section == evidence.section_id
     assert evidence.status == "current"
     assert evidence.score == evidence.relevance_score
+
+
+def test_structured_llm_client_is_used_for_semantic_verification():
+    llm = FakeStructuredLLM(
+        FactVerificationDecision(
+            verdict=Verdict.SUPPORTED,
+            explanation="The active policy supports the claim.",
+        )
+    )
+    agent = FactVerificationAgent(llm_client=llm)
+    claim = _make_claim("C1", "Staff receive annual leave.")
+    evidence = [
+        _make_evidence("E1", "Staff receive annual leave.", "HR_POL_001", "HR_POL_001-S01")
+    ]
+
+    result = agent.verify([claim], evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.SUPPORTED
+    assert len(llm.calls) == 1
+    system, user, schema, kwargs = llm.calls[0]
+    assert "untrusted data" in system
+    assert "Staff receive annual leave" in user
+    assert schema is FactVerificationDecision
+    assert kwargs["temperature"] == 0.0
+
+
+def test_structured_llm_failure_fails_closed():
+    def failing_llm(system, user, schema, **kwargs):
+        raise RuntimeError("All providers unavailable")
+
+    agent = FactVerificationAgent(llm_client=failing_llm)
+    claim = _make_claim("C1", "Staff receive annual leave.")
+    evidence = [
+        _make_evidence("E1", "Staff receive annual leave.", "HR_POL_001", "HR_POL_001-S01")
+    ]
+
+    result = agent.verify([claim], evidence)
+
+    assert result.claim_verdicts[0].verdict == Verdict.INSUFFICIENT_EVIDENCE
+    assert "failed" in result.claim_verdicts[0].explanation.lower()
