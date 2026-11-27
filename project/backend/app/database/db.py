@@ -20,7 +20,7 @@ DEFAULT_DB_PATH = BACKEND_DIR / "data" / "aegis.db"
 # Allowed values. Keep these identical across the whole team.
 VERDICTS = ("supported", "contradicted", "unsupported")
 ACTIONS = ("approve", "correct", "block", "human_review")
-MODES = ("multi_agent", "single_agent", "pasthrough")
+MODES = ("multi_agent", "single_agent", "passthrough")
 RISK_LEVELS = ("low", "medium", "high")
 RUN_STATUSES = ("running", "completed", "failed")
 REVIEW_STATUSES = ("pending", "resolved")
