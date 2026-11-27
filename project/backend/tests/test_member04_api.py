@@ -152,3 +152,168 @@ def test_audit_retrieves_saved_event(monkeypatch, tmp_path):
         assert data["events"][0]["agent"] == "backend_test"
     finally:
         app.dependency_overrides.pop(db.get_db, None)
+
+
+def test_prepared_verify_requires_api_key(monkeypatch):
+    monkeypatch.setenv("AEGIS_API_KEY", "test-admin-key")
+    monkeypatch.setenv("AEGIS_REVIEWER_API_KEY", "test-reviewer-key")
+
+    response = client.post(
+        "/api/verify/prepared",
+        json={
+            "question": "What leave is available?",
+            "draft_answer": "Staff receive annual leave.",
+            "claims": [
+                {
+                    "claim_id": "C1",
+                    "claim_text": "Staff receive annual leave."
+                }
+            ],
+            "evidence_chunks": []
+        },
+    )
+
+    assert response.status_code == 401
+
+
+def test_prepared_verify_rejects_reviewer(monkeypatch):
+    monkeypatch.setenv("AEGIS_API_KEY", "test-admin-key")
+    monkeypatch.setenv("AEGIS_REVIEWER_API_KEY", "test-reviewer-key")
+
+    response = client.post(
+        "/api/verify/prepared",
+        headers={"X-API-Key": "test-reviewer-key"},
+        json={
+            "question": "What leave is available?",
+            "draft_answer": "Staff receive annual leave.",
+            "claims": [
+                {
+                    "claim_id": "C1",
+                    "claim_text": "Staff receive annual leave."
+                }
+            ],
+            "evidence_chunks": []
+        },
+    )
+
+    assert response.status_code == 403
+
+
+def test_prepared_verify_rejects_empty_claims(monkeypatch):
+    monkeypatch.setenv("AEGIS_API_KEY", "test-admin-key")
+    monkeypatch.setenv("AEGIS_REVIEWER_API_KEY", "test-reviewer-key")
+
+    response = client.post(
+        "/api/verify/prepared",
+        headers={"X-API-Key": "test-admin-key"},
+        json={
+            "question": "What leave is available?",
+            "draft_answer": "Staff receive annual leave.",
+            "claims": [],
+            "evidence_chunks": []
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_prepared_verify_saves_result(monkeypatch, tmp_path):
+    from app.database import db
+    from app.agents.fact_verification import FactVerificationAgent
+    from app.orchestration.workflow import build_post_retrieval_graph
+    from app.services.verification_service import VerificationService
+    from app.schemas.verification import FactVerificationDecision, Verdict
+    from app.api.routes import verify
+
+    monkeypatch.setenv("AEGIS_API_KEY", "test-admin-key")
+    monkeypatch.setenv("AEGIS_REVIEWER_API_KEY", "test-reviewer-key")
+
+    def fake_llm(system, user, schema, **kwargs):
+        return FactVerificationDecision(
+            verdict=Verdict.SUPPORTED,
+            explanation="Active evidence supports the claim.",
+        )
+
+    def create_test_service(connection):
+        graph = build_post_retrieval_graph(
+            fact_agent=FactVerificationAgent(llm_client=fake_llm)
+        )
+        return VerificationService(connection, graph=graph)
+
+    monkeypatch.setattr(
+        verify, "VerificationService", create_test_service
+    )
+
+    test_db = tmp_path / "prepared_verify.sqlite3"
+
+    def get_test_db():
+        connection = db.connect(str(test_db))
+        db.init_db(connection)
+        try:
+            yield connection
+        finally:
+            connection.close()
+
+    app.dependency_overrides[db.get_db] = get_test_db
+
+    headers = {"X-API-Key": "test-admin-key"}
+
+    try:
+        response = client.post(
+            "/api/verify/prepared",
+            headers=headers,
+            json={
+                "question": "What leave is available?",
+                "draft_answer": "Staff receive annual leave.",
+                "claims": [
+                    {
+                        "claim_id": "C1",
+                        "claim_text": "Staff receive annual leave."
+                    }
+                ],
+                "evidence_chunks": [
+                    {
+                        "chunk_id": "HR_POL_001-S02",
+                        "text": "Staff receive annual leave.",
+                        "document_id": "HR_POL_001",
+                        "section_id": "HR_POL_001-S02",
+                        "page": 1,
+                        "document_version": "2.0",
+                        "document_status": "ACTIVE",
+                        "effective_date": "2026-09-01",
+                        "policy_topic": "annual_leave"
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 200
+
+        result = response.json()
+
+        assert result["action"] == "approve"
+        assert result["verification"]["supported_count"] == 1
+        assert result["security"]["overall_risk"] == "low"
+
+        run_id = result["run_id"]
+
+        audit = client.get(
+            f"/api/audit/runs/{run_id}",
+            headers=headers,
+        )
+
+        assert audit.status_code == 200
+
+        data = audit.json()
+
+        assert data["run"]["status"] == "completed"
+        assert data["run"]["action"] == "approve"
+        assert len(data["claims"]) == 1
+
+        events = [event["event"] for event in data["events"]]
+
+        assert "workflow_started" in events
+        assert "workflow_completed" in events
+
+    finally:
+        app.dependency_overrides.pop(db.get_db, None)

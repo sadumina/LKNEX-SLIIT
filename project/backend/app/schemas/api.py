@@ -5,7 +5,7 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.decision import FinalAction
-from app.schemas.verification import RiskLevel, SecurityFinding, Verdict
+from app.schemas.verification import Claim, EvidenceChunk, RiskLevel, SecurityFinding, Verdict
 
 
 class VerifyRequest(BaseModel):
@@ -61,3 +61,13 @@ class WorkflowResultResponse(BaseModel):
     security: SecuritySummaryResponse
     latency_ms: int
     llm_calls: int
+
+
+class PreparedVerifyRequest(BaseModel):
+    """Controlled integration testing request."""
+
+    question: str = Field(min_length=1)
+    draft_answer: str = Field(min_length=1)
+    claims: List[Claim] = Field(min_length=1)
+    evidence_chunks: List[EvidenceChunk]
+    mode: Literal["multi_agent"] = "multi_agent"
