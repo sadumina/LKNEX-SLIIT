@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import db
 from app.api.routes.audit import router as audit_router
+from app.api.routes.auth import router as auth_router
 from app.api.routes.verify import router as verify_router
 
 @asynccontextmanager
@@ -49,3 +50,4 @@ def health_check():
 app.router.include_router(verify_router)
 
 app.include_router(audit_router)
+app.include_router(auth_router)
