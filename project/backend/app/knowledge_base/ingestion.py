@@ -18,11 +18,6 @@ from typing import Iterator, Literal
 
 from pydantic import BaseModel, Field
 
-try: 
-    import pymupdf
-except ImportError:  
-    import fitz as pymupdf
-
 logger = logging.getLogger(__name__)
 
 
@@ -74,20 +69,42 @@ def iter_pages(
                 f"{doc.doc_id}: file listed in manifest not found: {pdf_path}"
             )
 
-        with pymupdf.open(pdf_path) as pdf:
-            for page in pdf:
-                # "blocks" keeps paragraph boundaries; sort=True gives reading order.
-                blocks = page.get_text("blocks", sort=True)
-                texts = [
-                    b[4].strip() for b in blocks if b[6] == 0 and b[4].strip()
-                ]  # b[6] == 0: text block
-                text = "\n\n".join(texts)
+        try:
+            import pymupdf
+
+            pdf = pymupdf.open(pdf_path)
+            pages = (
+                (
+                    page.number + 1,
+                    "\n\n".join(
+                        block[4].strip()
+                        for block in page.get_text("blocks", sort=True)
+                        if block[6] == 0 and block[4].strip()
+                    ),
+                )
+                for page in pdf
+            )
+        except (ImportError, OSError):
+            from pypdf import PdfReader
+
+            pdf = None
+            reader = PdfReader(str(pdf_path))
+            pages = (
+                (page_number, page.extract_text() or "")
+                for page_number, page in enumerate(reader.pages, start=1)
+            )
+
+        try:
+            for page_number, text in pages:
                 if not text.strip():
                     # Scanned pages have no text layer. OCR is out of scope for the MVP.
                     logger.warning(
                         "%s page %d has no extractable text (scanned?). Skipped.",
                         doc.doc_id,
-                        page.number + 1,
+                        page_number,
                     )
                     continue
-                yield PageRecord(doc=doc, page=page.number + 1, text=text)
+                yield PageRecord(doc=doc, page=page_number, text=text)
+        finally:
+            if pdf is not None:
+                pdf.close()

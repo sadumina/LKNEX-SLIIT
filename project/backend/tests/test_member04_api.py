@@ -7,20 +7,47 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_verify_supervisor_not_ready():
+def test_verify_runs_complete_pipeline(monkeypatch):
+    from app.services.verification_service import VerificationService
+
+    monkeypatch.setattr(
+        VerificationService,
+        "verify_complete",
+        lambda self, **kwargs: {
+            "run_id": "test-run",
+            "action": "approve",
+            "decision_reason": "All claims are supported.",
+            "final_answer": kwargs["draft_answer"],
+            "verification": {
+                "overall_status": "all_supported",
+                "total_claims": 1,
+                "supported_count": 1,
+                "contradicted_count": 0,
+                "insufficient_count": 0,
+                "claims": [],
+            },
+            "security": {
+                "overall_risk": "low",
+                "recommended_action": "allow",
+                "findings": [],
+            },
+            "latency_ms": 1,
+            "llm_calls": 1,
+        },
+    )
     response = client.post(
         "/api/verify",
         json={
             "question": "What is AI?",
             "draft_answer": "AI means artificial intelligence.",
+            "user_role": "employee",
             "mode": "multi_agent",
         },
     )
 
-    assert response.status_code == 503
-    assert response.json()["detail"] == (
-        "Verification supervisor is not integrated yet."
-    )
+    assert response.status_code == 200
+    assert response.json()["action"] == "approve"
+    assert response.json()["run_id"] == "test-run"
 
 
 def test_verify_rejects_missing_question():

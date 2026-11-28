@@ -9,10 +9,16 @@ asks Chroma to search ONLY those documents, so restricted chunks never even
 enter the candidate list.
 """
 
+import json
+import math
 from pathlib import Path
 
-import chromadb
-from chromadb.config import Settings
+try:
+    import chromadb
+    from chromadb.config import Settings
+except (ImportError, OSError):
+    chromadb = None
+    Settings = None
 
 from app.knowledge_base.preprocessing import Chunk
 
@@ -23,13 +29,22 @@ BATCH_SIZE = 256
 class VectorStore:
     def __init__(self, path: Path | str, collection_name: str = COLLECTION_NAME):
         self.collection_name = collection_name
-        self.client = chromadb.PersistentClient(
-            path=str(path),
-            settings=Settings(anonymized_telemetry=False),
-        )
-        self.collection = self._open()
+        self.path = Path(path)
+        self.path.mkdir(parents=True, exist_ok=True)
+        self.fallback_path = self.path / f"{collection_name}.json"
+        if chromadb is None:
+            self.client = None
+            self.collection = None
+        else:
+            self.client = chromadb.PersistentClient(
+                path=str(path),
+                settings=Settings(anonymized_telemetry=False),
+            )
+            self.collection = self._open()
 
     def _open(self):
+        if self.client is None:
+            return None
         return self.client.get_or_create_collection(
             name=self.collection_name,
             metadata={"hnsw:space": "cosine"},
@@ -37,6 +52,9 @@ class VectorStore:
 
     def reset(self) -> None:
         """Delete everything and start with an empty collection."""
+        if self.client is None:
+            self.fallback_path.unlink(missing_ok=True)
+            return
         try:
             self.client.delete_collection(self.collection_name)
         except Exception:  # collection did not exist yet
@@ -44,12 +62,30 @@ class VectorStore:
         self.collection = self._open()
 
     def count(self) -> int:
+        if self.collection is None:
+            return len(self._fallback_records())
         return self.collection.count()
+
+    def _fallback_records(self) -> list[dict]:
+        if not self.fallback_path.exists():
+            return []
+        return json.loads(self.fallback_path.read_text(encoding="utf-8"))
 
     def add_chunks(self, chunks: list[Chunk], embeddings: list[list[float]]) -> None:
         """Store chunks with their vectors. Metadata values must be plain strings or numbers."""
         if len(chunks) != len(embeddings):
             raise ValueError("chunks and embeddings must have the same length")
+        if self.collection is None:
+            records = [
+                {
+                    "chunk_id": chunk.chunk_id,
+                    "doc_id": chunk.doc_id,
+                    "embedding": embedding,
+                }
+                for chunk, embedding in zip(chunks, embeddings)
+            ]
+            self.fallback_path.write_text(json.dumps(records), encoding="utf-8")
+            return
         for start in range(0, len(chunks), BATCH_SIZE):
             batch = chunks[start : start + BATCH_SIZE]
             self.collection.upsert(
@@ -79,6 +115,20 @@ class VectorStore:
         total = self.count()
         if not allowed_doc_ids or total == 0:
             return []
+        if self.collection is None:
+            query_norm = math.sqrt(sum(value * value for value in query_embedding)) or 1.0
+            matches = []
+            for record in self._fallback_records():
+                if record["doc_id"] not in allowed_doc_ids:
+                    continue
+                vector = record["embedding"]
+                vector_norm = math.sqrt(sum(value * value for value in vector)) or 1.0
+                similarity = sum(
+                    left * right for left, right in zip(query_embedding, vector)
+                ) / (query_norm * vector_norm)
+                matches.append((record["chunk_id"], similarity))
+            matches.sort(key=lambda item: item[1], reverse=True)
+            return matches[:n_results]
         result = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=min(n_results, total),

@@ -18,12 +18,6 @@ try:
 except ImportError:
     call_structured = None  # type: ignore
 
-try:
-    from app.knowledge_base.vector_store import VectorStore
-except ImportError:
-    VectorStore = None  # type: ignore
-
-
 class FactVerificationAgent:
     """
     Evaluates extracted factual claims against retrieved evidence from trusted
@@ -49,12 +43,10 @@ class FactVerificationAgent:
         else:
             self.llm = call_structured
 
-        if vector_store is not None:
-            self.vector_store = vector_store
-        elif VectorStore is not None:
-            self.vector_store = VectorStore()
-        else:
-            self.vector_store = None
+        # Evidence retrieval owns vector-store access. This compatibility
+        # attribute remains for older callers but verification uses only the
+        # evidence chunks supplied by the pipeline.
+        self.vector_store = vector_store
 
     # ------------------------------------------------------------------
     # Public entry point

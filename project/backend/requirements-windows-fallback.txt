@@ -1,0 +1,4 @@
+# Install after requirements.txt on Windows machines where Application Control
+# blocks PyMuPDF/ChromaDB native extensions.
+pypdf==6.4.0
+reportlab==4.4.4

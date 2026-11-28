@@ -224,6 +224,7 @@ def test_no_keys_at_all_gives_a_helpful_error(monkeypatch):
 
 def test_key_without_a_model_is_reported(monkeypatch):
     monkeypatch.delenv("GROQ_MODEL")
+    monkeypatch.setenv("LLM_PIN_PROVIDER", "groq")
     with pytest.raises(RuntimeError, match="GROQ_MODEL"):
         _call()
 
