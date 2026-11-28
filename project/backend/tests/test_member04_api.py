@@ -1,19 +1,33 @@
 """Automated tests for Member 04 FastAPI endpoints."""
 
+import pytest
 from fastapi.testclient import TestClient
 
+from app.database import db
 from app.main import app
 
 client = TestClient(app)
 
 
-def test_verify_runs_complete_pipeline(monkeypatch):
+@pytest.fixture
+def account_headers(monkeypatch, tmp_path):
+    monkeypatch.setenv("AEGIS_DB_PATH", str(tmp_path / "accounts.sqlite3"))
+    credentials = {"email": "account@example.com", "password": "Demo1234"}
+    with TestClient(app) as auth_client:
+        signup = auth_client.post("/api/auth/signup", json={**credentials, "role": "admin"})
+        assert signup.status_code == 201
+        assert signup.json()["role"] == "user"
+        login = auth_client.post("/api/auth/login", json=credentials)
+        assert login.status_code == 200
+        return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+def test_verify_runs_complete_pipeline(monkeypatch, account_headers):
     from app.services.verification_service import VerificationService
 
-    monkeypatch.setattr(
-        VerificationService,
-        "verify_complete",
-        lambda self, **kwargs: {
+    def verify(self, **kwargs):
+        assert kwargs["user_role"] == "user"
+        return {
             "run_id": "test-run",
             "action": "approve",
             "decision_reason": "All claims are supported.",
@@ -33,14 +47,16 @@ def test_verify_runs_complete_pipeline(monkeypatch):
             },
             "latency_ms": 1,
             "llm_calls": 1,
-        },
-    )
+        }
+
+    monkeypatch.setattr(VerificationService, "verify_complete", verify)
     response = client.post(
         "/api/verify",
+        headers=account_headers,
         json={
             "question": "What is AI?",
             "draft_answer": "AI means artificial intelligence.",
-            "user_role": "employee",
+            "user_role": "admin",
             "mode": "multi_agent",
         },
     )
@@ -50,9 +66,10 @@ def test_verify_runs_complete_pipeline(monkeypatch):
     assert response.json()["run_id"] == "test-run"
 
 
-def test_verify_rejects_missing_question():
+def test_verify_rejects_missing_question(account_headers):
     response = client.post(
         "/api/verify",
+        headers=account_headers,
         json={
             "draft_answer": "AI means artificial intelligence.",
             "mode": "multi_agent",
@@ -60,6 +77,48 @@ def test_verify_rejects_missing_question():
     )
 
     assert response.status_code == 422
+
+
+def test_account_roles_and_session_expiry(account_headers):
+    history = "/api/audit/runs"
+    stats = "/api/audit/stats/actions"
+    assert client.get(history, headers=account_headers).status_code == 403
+    assert client.post("/api/verify", json={"question": "Q", "draft_answer": "A"}).status_code == 401
+
+    connection = db.connect()
+    try:
+        with connection:
+            connection.execute("UPDATE user_sessions SET expires_at = 0")
+        assert client.get(history, headers=account_headers).status_code == 401
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize(
+    ("domain", "role", "env_var", "history_status", "stats_status"),
+    [
+        ("admin.com", "admin", "AEGIS_ADMIN_SIGNUP_CODE", 200, 200),
+        ("systemengineer.com", "systems_engineer", "AEGIS_SYSTEMS_ENGINEER_SIGNUP_CODE", 200, 403),
+        ("hr.com", "hr", "AEGIS_HR_SIGNUP_CODE", 403, 403),
+    ],
+)
+def test_domain_roles(monkeypatch, tmp_path, domain, role, env_var, history_status, stats_status):
+    monkeypatch.setenv("AEGIS_DB_PATH", str(tmp_path / "accounts.sqlite3"))
+    monkeypatch.setenv(env_var, "test-signup-code")
+    credentials = {"email": f"ExampleUser@{domain.upper()}", "password": "Demo1234"}
+    with TestClient(app) as auth_client:
+        assert auth_client.post("/api/auth/signup", json=credentials).status_code == 403
+        signup = auth_client.post(
+            "/api/auth/signup", json={**credentials, "signup_code": "test-signup-code"}
+        )
+        assert signup.status_code == 201
+        assert signup.json()["role"] == role
+        login = auth_client.post("/api/auth/login", json=credentials)
+        assert login.status_code == 200
+        assert login.json()["user"]["role"] == role
+        headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+        assert auth_client.get("/api/audit/runs", headers=headers).status_code == history_status
+        assert auth_client.get("/api/audit/stats/actions", headers=headers).status_code == stats_status
 
 
 def test_audit_rejects_missing_api_key(monkeypatch):
