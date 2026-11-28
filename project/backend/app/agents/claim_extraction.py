@@ -67,7 +67,7 @@ NEGATION_RE = re.compile(
 )
 
 
-def tags_dates(text: str) -> list[str]:
+def tag_dates(text: str) -> list[str]:
     return _unique(m.group(0).strip() for m in DATE_RE.finditer(text))
 
 
@@ -115,7 +115,7 @@ def _finalise(extracted: list[ExtractedClaim]) -> list[Claim]:
                 entities=_unique(e.strip() for e in item.entities if e.strip()),
                 negated=item.negated or bool(NEGATION_RE.search(text)),
                 numbers=tag_numbers(text),
-                dates=tags_dates(text),
+                dates=tag_dates(text),
             )
         )
 

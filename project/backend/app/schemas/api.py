@@ -11,7 +11,7 @@ from app.schemas.verification import RiskLevel, SecurityFinding, Verdict
 class VerifyRequest(BaseModel):
     question: str = Field(min_length=1)
     draft_answer: str = Field(min_length=1)
-    mode: Literal["multi_agent", "single_agent", "pasthrough"] = "multi_agent"
+    mode: Literal["multi_agent", "single_agent", "passthrough"] = "multi_agent"
 
 
 class VerifyResponse(BaseModel):
