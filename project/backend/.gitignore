@@ -60,7 +60,8 @@ tmp/
 
 /.local/
 
-data/aegis.db*
-data/synthetic
-data/processed/
-data/sample_documents
+/data/aegis.db*
+/data/synthetic
+/data/processed/
+/data/sample_documents
+/data/pytest-temp
