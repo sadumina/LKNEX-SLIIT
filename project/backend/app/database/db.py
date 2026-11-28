@@ -6,7 +6,9 @@ import sqlite3
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, get_args
+
+from app.schemas.auth import UserRole
 
 try:
     from dotenv import load_dotenv
@@ -25,6 +27,7 @@ RISK_LEVELS = ("low", "medium", "high")
 RUN_STATUSES = ("running", "completed", "failed")
 REVIEW_STATUSES = ("pending", "resolved")
 REVIEW_DECISIONS = ("approve", "correct", "block")
+USER_ROLES = get_args(UserRole)
 
 
 def _in(values: tuple[str, ...]) -> str:
@@ -32,7 +35,25 @@ def _in(values: tuple[str, ...]) -> str:
     return "(" + ", ".join(repr(v) for v in values) + ")"
 
 
+_USER_ROLE_COLUMN = f"account_role TEXT NOT NULL DEFAULT 'user' CHECK (account_role IN {_in(USER_ROLES)})"
+
 _SCHEMA = f"""
+CREATE TABLE IF NOT EXISTS users (
+    id            INTEGER PRIMARY KEY,
+    email         TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at    TEXT NOT NULL,
+    {_USER_ROLE_COLUMN}
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    token_hash TEXT PRIMARY KEY,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expires_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expiry ON user_sessions(expires_at);
+
 CREATE TABLE IF NOT EXISTS verification_runs (
     run_id       TEXT PRIMARY KEY,
     created_at   TEXT NOT NULL,
@@ -162,6 +183,13 @@ def connect(dp_path: Path | str | None = None) -> sqlite3.Connection:
 def init_db(conn: sqlite3.Connection) -> None:
     """Create all tables and indexes. Safe to call many times (IF NOT EXISTS). Call once at application start."""
     conn.executescript(_SCHEMA)
+    with conn:
+        conn.execute("BEGIN IMMEDIATE")
+        columns = {column["name"] for column in conn.execute("PRAGMA table_info(users)")}
+        if "account_role" not in columns:
+            conn.execute(f"ALTER TABLE users ADD COLUMN {_USER_ROLE_COLUMN}")
+        if "role" in columns:
+            conn.execute("ALTER TABLE users DROP COLUMN role")
 
 
 def get_db() -> Iterator[sqlite3.Connection]:
