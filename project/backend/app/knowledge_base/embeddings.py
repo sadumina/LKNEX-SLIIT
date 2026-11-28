@@ -9,11 +9,16 @@ The model is downloaded from Hugging Face the first time it is used and cached
 afterwards. Change it with EMBEDDING_MODEL in .env.
 """
 
+import hashlib
+import logging
+import math
 import os
+import re
 from functools import lru_cache
 from typing import Protocol
 
 DEFAULT_MODEL = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+logger = logging.getLogger(__name__)
 
 # bge models work best when SEARCH QUERIES (not passages) start with this instruction.
 BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
@@ -63,11 +68,61 @@ class Embedder:
     def embed_queries(self, texts: list[str]) -> list[list[float]]:
         """Embed claims used as search queries (batched in one call)."""
         if "bge" in self.model_name.lower():
-            texts = [BGE_QUERY_PREFIX + t for t in texts]
+            texts = [BGE_QUERY_PREFIX + text for text in texts]
         return self._encode(texts)
 
 
+class HashingEmbedder:
+    """Pure-Python retrieval fallback for systems that block ML native DLLs."""
+
+    def __init__(self, dim: int = 256):
+        self.dim = dim
+
+    def _encode_one(self, text: str) -> list[float]:
+        vector = [0.0] * self.dim
+        for token in re.findall(r"\d+(?:[.,]\d+)*|\w+", text.lower()):
+            bucket = int(hashlib.md5(token.encode("utf-8")).hexdigest(), 16) % self.dim
+            vector[bucket] += 1.0
+        norm = math.sqrt(sum(value * value for value in vector)) or 1.0
+        return [value / norm for value in vector]
+
+    def embed_passages(self, texts: list[str]) -> list[list[float]]:
+        return [self._encode_one(text) for text in texts]
+
+    def embed_queries(self, texts: list[str]) -> list[list[float]]:
+        return [self._encode_one(text) for text in texts]
+
+
+class ResilientEmbedder:
+    """Prefer semantic embeddings and permanently fall back after a load failure."""
+
+    def __init__(self, primary: Embedder | None = None, fallback=None):
+        self.primary = primary or Embedder()
+        self.fallback = fallback or HashingEmbedder()
+        self._native_unavailable = False
+
+    def _embed(self, method: str, texts: list[str]) -> list[list[float]]:
+        if not self._native_unavailable:
+            try:
+                return getattr(self.primary, method)(texts)
+            except (ImportError, OSError) as error:
+                self._native_unavailable = True
+                logger.warning(
+                    "Semantic embedder unavailable; using pure-Python hashing fallback: %s",
+                    error,
+                )
+        return getattr(self.fallback, method)(texts)
+
+    def embed_passages(self, texts: list[str]) -> list[list[float]]:
+        return self._embed("embed_passages", texts)
+
+    def embed_queries(self, texts: list[str]) -> list[list[float]]:
+        return self._embed("embed_queries", texts)
+
+
 @lru_cache(maxsize=1)
-def get_embedder() -> Embedder:
+def get_embedder() -> EmbedderProtocol:
     """Shared embedder so the model is loaded only once per process."""
-    return Embedder()
+    if os.getenv("EMBEDDING_BACKEND", "").strip().lower() == "hashing":
+        return HashingEmbedder()
+    return ResilientEmbedder()
