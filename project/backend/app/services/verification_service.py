@@ -5,6 +5,7 @@
 import sqlite3
 import time
 
+from app.agents import claim_extraction, evidence_retrieval
 from app.core.llm_client import get_call_log
 from app.database import db
 from app.orchestration.state import initial_state
@@ -34,6 +35,46 @@ class VerificationService:
         self.connection = connection
         self.graph = graph or build_post_retrieval_graph()
         db.init_db(connection)
+
+    def verify_complete(
+        self,
+        *,
+        question: str,
+        draft_answer: str,
+        user_role: str,
+        mode: str = "multi_agent",
+        claim_llm=None,
+        retriever=None,
+    ) -> WorkflowResultResponse:
+        """Run extraction, retrieval, verification, security, and policy routing."""
+        extraction = claim_extraction.run(
+            {"question": question, "draft_answer": draft_answer},
+            llm=claim_llm,
+        )
+        claims = extraction["claims"]
+        retrieved = evidence_retrieval.run(
+            {"claims": claims, "user": {"role": user_role}},
+            retriever=retriever,
+        )["evidence"]
+
+        # Retrieval groups chunks by claim. Downstream security and verification
+        # scan a single deduplicated list while verdicts retain claim IDs.
+        evidence_chunks = []
+        seen_chunk_ids: set[str] = set()
+        for claim in claims:
+            for chunk in retrieved.get(claim.claim_id, []):
+                if chunk.chunk_id not in seen_chunk_ids:
+                    seen_chunk_ids.add(chunk.chunk_id)
+                    evidence_chunks.append(chunk)
+
+        return self.verify_prepared(
+            question=question,
+            draft_answer=draft_answer,
+            user_role=user_role,
+            claims=claims,
+            evidence_chunks=evidence_chunks,
+            mode=mode,
+        )
 
     def verify_prepared(
         self,

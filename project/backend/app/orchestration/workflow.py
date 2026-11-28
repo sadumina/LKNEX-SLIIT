@@ -2,7 +2,10 @@
 
 """Composable workflow stages used while the complete supervisor graph is built."""
 
-from langgraph.graph import END, START, StateGraph
+try:
+    from langgraph.graph import END, START, StateGraph
+except (ImportError, OSError):
+    END = START = StateGraph = None
 
 from app.agents.fact_verification import FactVerificationAgent, run as run_fact_verification
 from app.agents.security_assessment import (
@@ -69,8 +72,18 @@ def build_post_retrieval_graph(
     shared state. Contradicted claims receive at most the correction attempts
     allowed by ``CorrectionStatus`` and are then re-verified.
     """
-    graph = StateGraph(AgentState)
     node_supervisor = supervisor or Supervisor()
+
+    if StateGraph is None:
+        return _PurePythonGraph(
+            fact_agent=fact_agent,
+            security_agent=security_agent,
+            policy_engine=policy_engine,
+            correction_agent=correction_agent,
+            supervisor=node_supervisor,
+        )
+
+    graph = StateGraph(AgentState)
 
     def fact_node(state: AgentState) -> dict:
         update = node_supervisor.execute(
@@ -148,3 +161,73 @@ def build_post_retrieval_graph(
     graph.add_edge(FinalAction.HUMAN_REVIEW.value, END)
 
     return graph.compile()
+
+
+class _PurePythonGraph:
+    """LangGraph-compatible runner for systems that prohibit native extensions."""
+
+    def __init__(
+        self,
+        *,
+        fact_agent=None,
+        security_agent=None,
+        policy_engine=None,
+        correction_agent=None,
+        supervisor=None,
+    ):
+        self.fact_agent = fact_agent
+        self.security_agent = security_agent
+        self.policy_engine = policy_engine
+        self.correction_agent = correction_agent
+        self.supervisor = supervisor or Supervisor()
+
+    def _execute(self, state, name, operation, *, max_attempts=None):
+        update = self.supervisor.execute(name, operation, max_attempts=max_attempts)
+        state.update(update)
+        return update
+
+    def invoke(self, initial):
+        state = AgentState(initial.copy())
+        while True:
+            self._execute(
+                state,
+                "fact_verification",
+                lambda: run_fact_verification(state, agent=self.fact_agent),
+            )
+            self._execute(
+                state,
+                "security_assessment",
+                lambda: run_security_assessment(state, agent=self.security_agent),
+            )
+            self._execute(
+                state,
+                "policy_decision",
+                lambda: run_policy_decision(state, engine=self.policy_engine),
+                max_attempts=1,
+            )
+
+            action = state["policy_decision"].action
+            if action == FinalAction.APPROVE:
+                state.update(_approve_node(state))
+                return state
+            if action == FinalAction.BLOCK:
+                state.update(_block_node(state))
+                return state
+            if action == FinalAction.HUMAN_REVIEW:
+                state.update(_human_review_node(state))
+                return state
+
+            update = self._execute(
+                state,
+                "correction",
+                lambda: run_correction(state, agent=self.correction_agent),
+            )
+            if update.get("workflow_error") is not None:
+                self._execute(
+                    state,
+                    "policy_decision",
+                    lambda: run_policy_decision(state, engine=self.policy_engine),
+                    max_attempts=1,
+                )
+                state.update(_human_review_node(state))
+                return state

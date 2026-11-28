@@ -161,6 +161,8 @@ def _chain(provider: str | None) -> tuple[list[_Resolved], bool]:
         try:
             resolved = _resolve(name)
         except RuntimeError as exc:
+            if name not in PROVIDERS:
+                raise RuntimeError(f"Invalid LLM provider configuration for {name}: {exc}") from exc
             configuration_errors.append(f"{name}: {exc}")
             logger.warning("llm_provider_configuration_skipped provider=%s reason=%s", name, exc)
             continue

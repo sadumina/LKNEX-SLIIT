@@ -13,8 +13,10 @@ removal in preprocessing.py is exercised.
 """
 
 from pathlib import Path
+import json
+import textwrap
 
-import pymupdf
+from reportlab.pdfgen import canvas
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "data" / "sample_documents"
 
@@ -89,30 +91,58 @@ DOCUMENTS = [
     },
 ]
 
+MANIFEST = {
+    "documents": [
+        {
+            "doc_id": "returns-policy",
+            "title": "Returns Policy",
+            "version": "3.2",
+            "effective_date": "2026-01-01",
+            "status": "current",
+            "allowed_roles": ["customer_service", "manager"],
+            "filename": "returns_policy_v3.2.pdf",
+        },
+        {
+            "doc_id": "returns-faq",
+            "title": "Returns FAQ 2024",
+            "version": "2024",
+            "effective_date": "2024-01-01",
+            "status": "superseded",
+            "allowed_roles": ["customer_service", "manager"],
+            "filename": "returns_faq_2024.pdf",
+        },
+        {
+            "doc_id": "finance-ops-manual",
+            "title": "Finance Operations Manual",
+            "version": "7",
+            "effective_date": "2026-01-01",
+            "status": "current",
+            "allowed_roles": ["finance", "manager"],
+            "filename": "finance_operations_manual_v7.pdf",
+        },
+    ]
+}
+
 
 def make_pdf(spec: dict) -> Path:
-    doc = pymupdf.open()
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = OUT_DIR / spec["filename"]
+    doc = canvas.Canvas(str(path), pagesize=(595, 842))
     total = len(spec["pages"])
     for number, paragraphs in enumerate(spec["pages"], start=1):
-        page = doc.new_page(width=595, height=842)  # A4
-        page.insert_text((72, 45), spec["header"], fontsize=9, fontname="helv")
-        page.insert_text(
-            (72, 810),
-            f"Page {number} of {total} - Internal use",
-            fontsize=9,
-            fontname="helv",
-        )
-        body = "\n\n".join(paragraphs)
-        leftover = page.insert_textbox(
-            pymupdf.Rect(72, 80, 523, 780), body, fontsize=11, fontname="helv"
-        )
-        if leftover < 0:
-            raise RuntimeError(
-                f"Text does not fit on page {number} of {spec['filename']}"
-            )
-    path = OUT_DIR / spec["filename"]
-    doc.save(path)
-    doc.close()
+        doc.setFont("Helvetica", 9)
+        doc.drawString(72, 797, spec["header"])
+        doc.drawString(72, 32, f"Page {number} of {total} - Internal use")
+        text = doc.beginText(72, 755)
+        text.setFont("Helvetica", 11)
+        text.setLeading(15)
+        for paragraph in paragraphs:
+            for line in textwrap.wrap(paragraph, width=82):
+                text.textLine(line)
+            text.textLine("")
+        doc.drawText(text)
+        doc.showPage()
+    doc.save()
     return path
 
 
@@ -120,6 +150,9 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     for spec in DOCUMENTS:
         print("created", make_pdf(spec))
+    manifest_path = OUT_DIR / "manifest.json"
+    manifest_path.write_text(json.dumps(MANIFEST, indent=2), encoding="utf-8")
+    print("created", manifest_path)
 
 
 if __name__ == "__main__":
