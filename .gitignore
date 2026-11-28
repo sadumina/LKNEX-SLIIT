@@ -60,5 +60,6 @@ tmp/
 
 /.local/
 
-# Synthetic dataset (do not commit)
-project/backend/data/
+# Local backend data (do not commit)
+project/backend/data/synthetic/
+project/backend/data/aegis.db*
